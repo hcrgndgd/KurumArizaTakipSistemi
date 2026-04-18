@@ -1,0 +1,40 @@
+package com.JavaProje.KurumArizaTakipSistemi.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.Set;
+
+/**
+ * Entity representing the category of a ticket.
+ * Maps to the 'TicketCategories' table.
+ */
+@Entity
+@Table(name = "ticket_categories")
+@Getter
+@Setter
+@NoArgsConstructor
+public class TicketCategory {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "CategoryId")
+    private Integer categoryId;
+
+    @Column(name = "CategoryName", nullable = false, length = 100)
+    private String categoryName;
+
+    /**
+     * Bidirectional relationship: One category can contain many tickets.
+     */
+    @OneToMany(mappedBy = "category")
+    private Set<Ticket> tickets;
+}
