@@ -43,5 +43,8 @@ src/main/resources/hibernate.properties
 # Log dosyaları
 *.log
 logs/
+# IDE ve ayar dosyalarını tamamen görmezden gel
+.idea/
+hibernate.properties
 
 
