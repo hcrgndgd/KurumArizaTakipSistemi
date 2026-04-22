@@ -1,6 +1,5 @@
 package com.JavaProje.KurumArizaTakipSistemi.web;
 
-
 import com.JavaProje.KurumArizaTakipSistemi.model.User;
 import com.JavaProje.KurumArizaTakipSistemi.service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -28,35 +27,35 @@ public class AuthController {
         String email = body.get("email");
         String password = body.get("password");
 
-        logger.info("POST /auth/register - Kayıt isteği | email={}", email);
+        logger.info("POST /auth/register - KayÄ±t isteÄŸi | email={}", email);
 
         try {
             userService.registerUser(fullName, email, password);
-            logger.info("Kayıt başarılı, doğrulama maili gönderildi | email={}", email);
-            return ResponseEntity.ok(Map.of("message", "Kayıt başarılı! Lütfen e-posta adresinizi doğrulayın."));
+            logger.info("KayÄ±t baÅŸarÄ±lÄ±, doÄŸrulama maili gÃ¶nderildi | email={}", email);
+            return ResponseEntity.ok(Map.of("message", "KayÄ±t baÅŸarÄ±lÄ±! LÃ¼tfen e-posta adresinizi doÄŸrulayÄ±n."));
         } catch (IllegalArgumentException e) {
-            logger.warn("Kayıt başarısız | email={} | sebep={}", email, e.getMessage());
+            logger.warn("KayÄ±t baÅŸarÄ±sÄ±z | email={} | sebep={}", email, e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
     @GetMapping("/verify")
     public ResponseEntity<Map<String, Object>> verifyEmail(@RequestParam("token") String token) {
-        logger.info("GET /auth/verify - Doğrulama isteği | token={}", token);
+        logger.info("GET /auth/verify - DoÄŸrulama isteÄŸi | token={}", token);
 
         boolean verified = userService.verifyEmail(token);
 
         if (verified) {
-            logger.info("Mail doğrulama başarılı | token={}", token);
+            logger.info("Mail doÄŸrulama baÅŸarÄ±lÄ± | token={}", token);
             return ResponseEntity.ok(Map.of(
                     "verified", true,
-                    "message", "E-posta adresiniz başarıyla doğrulandı. Giriş yapabilirsiniz."
+                    "message", "E-posta adresiniz baÅŸarÄ±yla doÄŸrulandÄ±. GiriÅŸ yapabilirsiniz."
             ));
         } else {
-            logger.warn("Mail doğrulama başarısız | token={}", token);
+            logger.warn("Mail doÄŸrulama baÅŸarÄ±sÄ±z | token={}", token);
             return ResponseEntity.badRequest().body(Map.of(
                     "verified", false,
-                    "message", "Doğrulama bağlantısı geçersiz veya süresi dolmuş."
+                    "message", "DoÄŸrulama baÄŸlantÄ±sÄ± geÃ§ersiz veya sÃ¼resi dolmuÅŸ."
             ));
         }
     }
@@ -66,7 +65,7 @@ public class AuthController {
         String email = body.get("email");
         String password = body.get("password");
 
-        logger.info("POST /auth/login - Giriş isteği | email={}", email);
+        logger.info("POST /auth/login - GiriÅŸ isteÄŸi | email={}", email);
 
         try {
             User user = userService.login(email, password);
@@ -75,15 +74,15 @@ public class AuthController {
             session.setAttribute("currentUser", user);
             session.setAttribute("userRole", roleName);
 
-            logger.info("Giriş başarılı | email={} | rol={}", email, roleName);
+            logger.info("GiriÅŸ baÅŸarÄ±lÄ± | email={} | rol={}", email, roleName);
 
             return ResponseEntity.ok(Map.of(
-                    "message", "Giriş başarılı",
+                    "message", "GiriÅŸ baÅŸarÄ±lÄ±",
                     "role", roleName,
                     "fullName", user.getFullName()
             ));
         } catch (IllegalArgumentException e) {
-            logger.warn("Giriş başarısız | email={} | sebep={}", email, e.getMessage());
+            logger.warn("GiriÅŸ baÅŸarÄ±sÄ±z | email={} | sebep={}", email, e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
     }
@@ -95,20 +94,20 @@ public class AuthController {
                 : "bilinmiyor";
 
         session.invalidate();
-        logger.info("POST /auth/logout - Çıkış yapıldı | email={}", email);
-        return ResponseEntity.ok(Map.of("message", "Çıkış başarılı."));
+        logger.info("POST /auth/logout - Ã‡Ä±kÄ±ÅŸ yapÄ±ldÄ± | email={}", email);
+        return ResponseEntity.ok(Map.of("message", "Ã‡Ä±kÄ±ÅŸ baÅŸarÄ±lÄ±."));
     }
 
     @PostMapping("/resend-verification")
     public ResponseEntity<Map<String, String>> resendVerification(@RequestBody Map<String, String> body) {
         String email = body.get("email");
-        logger.info("POST /auth/resend-verification - Yeniden doğrulama isteği | email={}", email);
+        logger.info("POST /auth/resend-verification - Yeniden doÄŸrulama isteÄŸi | email={}", email);
 
         try {
             userService.resendVerificationEmail(email);
-            return ResponseEntity.ok(Map.of("message", "Doğrulama maili tekrar gönderildi."));
+            return ResponseEntity.ok(Map.of("message", "DoÄŸrulama maili tekrar gÃ¶nderildi."));
         } catch (IllegalArgumentException e) {
-            logger.warn("Yeniden doğrulama başarısız | email={} | sebep={}", email, e.getMessage());
+            logger.warn("Yeniden doÄŸrulama baÅŸarÄ±sÄ±z | email={} | sebep={}", email, e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
