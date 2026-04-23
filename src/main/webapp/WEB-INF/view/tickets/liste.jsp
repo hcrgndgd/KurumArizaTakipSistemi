@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -253,10 +254,10 @@
                 <c:forEach items="${tickets}" var="t">
                     <tr>
                         <td>
-                            <a href="${pageContext.request.contextPath}/user/tickets/${t.ticketId}" class="ticket-link">#${t.ticketId}</a>
+                            <a href="#" class="ticket-link">#${t.ticketId}</a>
                         </td>
                         <td>
-                            <a href="${pageContext.request.contextPath}/user/tickets/${t.ticketId}" class="ticket-link">${t.title}</a>
+                            <a href="#" class="ticket-link">${t.title}</a>
                         </td>
                         <td>
                             <c:choose>

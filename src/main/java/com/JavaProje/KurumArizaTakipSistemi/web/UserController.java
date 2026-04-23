@@ -2,6 +2,7 @@ package com.JavaProje.KurumArizaTakipSistemi.web;
 
 import com.JavaProje.KurumArizaTakipSistemi.model.Ticket;
 import com.JavaProje.KurumArizaTakipSistemi.model.User;
+import com.JavaProje.KurumArizaTakipSistemi.service.CategorySuggestionService;
 import com.JavaProje.KurumArizaTakipSistemi.service.TicketService;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -29,6 +30,9 @@ public class UserController {
 
     @Autowired
     private TicketService ticketService;
+
+    @Autowired
+    private CategorySuggestionService categorySuggestionService;
 
     /**
      * GET /user/profile - Display user profile page
@@ -129,7 +133,7 @@ public class UserController {
             HttpSession session,
             @RequestParam("title") String title,
             @RequestParam("description") String description,
-            @RequestParam("categoryId") Integer categoryId,
+            @RequestParam(value = "categoryId", required = false) Integer categoryId,
             Model model) {
         
         logger.info("POST /user/tickets - Create new ticket - title={}", title);
@@ -141,6 +145,12 @@ public class UserController {
         }
         
         try {
+            if (categoryId == null) {
+                categoryId = categorySuggestionService.resolveCategory(null, title, description)
+                        .map(tc -> tc.getCategoryId())
+                        .orElse(null);
+                logger.info("POST /user/tickets - Category determined by Gemini AI: {}", categoryId);
+            }
             Ticket ticket = ticketService.createTicket(
                     currentUser.getUserId(),
                     title,

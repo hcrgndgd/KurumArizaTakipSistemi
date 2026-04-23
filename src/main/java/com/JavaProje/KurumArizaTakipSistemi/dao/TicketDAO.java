@@ -78,7 +78,7 @@ public class TicketDAO {
     public List<Ticket> findByRequesterId(Long userId) {
         logger.debug("TicketDAO.findByRequesterId() - userId={}", userId);
         return getSession()
-                .createQuery("FROM Ticket t WHERE t.requester.userId = :userId ORDER BY t.createdAt DESC", Ticket.class)
+                .createQuery("SELECT DISTINCT t FROM Ticket t LEFT JOIN FETCH t.category LEFT JOIN FETCH t.status WHERE t.requester.userId = :userId ORDER BY t.createdAt DESC", Ticket.class)
                 .setParameter("userId", userId)
                 .getResultList();
     }

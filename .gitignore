@@ -46,5 +46,4 @@ logs/
 # IDE ve ayar dosyalarını tamamen görmezden gel
 .idea/
 hibernate.properties
-
-
+ai.properties

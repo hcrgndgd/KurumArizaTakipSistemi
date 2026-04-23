@@ -22,6 +22,7 @@ import java.util.Properties;
         @ComponentScan("com.JavaProje.KurumArizaTakipSistemi.dao")
 })
 @PropertySource(value = "classpath:hibernate.properties", encoding = "UTF-8")
+@PropertySource(value = "classpath:ai.properties", encoding = "UTF-8")
 public class AppConfig {
 
     @Autowired
