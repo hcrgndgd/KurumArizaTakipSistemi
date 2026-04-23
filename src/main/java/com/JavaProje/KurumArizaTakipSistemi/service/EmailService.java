@@ -27,7 +27,12 @@ public class EmailService {
         String baseUrl = env.getProperty("mail.base-url");
         String fromEmail = env.getProperty("mail.username");
 
-        String verifyLink = baseUrl + "/auth/verify?token=" + token;
+        if (baseUrl == null || baseUrl.isBlank() || "null".equalsIgnoreCase(baseUrl.trim())) {
+            throw new IllegalStateException("mail.base-url property is missing. Please set it in hibernate.properties.");
+        }
+
+        String normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+        String verifyLink = normalizedBaseUrl + "/auth/verify?token=" + token;
 
         String htmlContent = """
                 <html><body style="font-family: Arial, sans-serif; color: #333;">

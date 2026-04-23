@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,5 +27,23 @@ public class RoleDAO {
                 .setParameter("name", roleName)
                 .getResultStream()
                 .findFirst();
+    }
+
+    public Optional<Role> findById(long roleId) {
+        return Optional.ofNullable(getSession().get(Role.class, (int) roleId));
+    }
+
+    public void save(Role role) {
+        getSession().persist(role);
+    }
+
+    public void delete(Role role) {
+        getSession().remove(role);
+    }
+
+    public List<Role> findAll() {
+        return getSession()
+                .createQuery("FROM Role r", Role.class)
+                .getResultList();
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -36,23 +37,35 @@ public class UserService {
         return hashPassword(rawPassword).equals(hashedPassword);
     }
 
-    private String allowedEmailDomain = "ogr.duzce.edu.tr";
+    private List<String> allowedEmailDomains = List.of("ogr.duzce.edu.tr", "gmail.com");
+
 
     @Transactional
     public void registerUser(String fullName, String email, String password) {
         logger.info("UserService.registerUser() - email={}", email);
 
-        if (!email.toLowerCase().endsWith("@" + allowedEmailDomain.toLowerCase())) {
-            throw new IllegalArgumentException(
-                    "Sadece @" + allowedEmailDomain + " uzantılı e-posta adresleri kabul edilmektedir.");
+        boolean isAllowed = false;
+        for(String allowedEmail: allowedEmailDomains)
+        {
+            if (email.toLowerCase().endsWith("@" + allowedEmail.toLowerCase()))
+            {
+                isAllowed = true;
+                break;
+            }
         }
+        if(!isAllowed) throw new IllegalArgumentException("bu uzantılı uzantılı e-posta adresleri kabul edilmektedir.");
+
 
         if (userDAO.existsByEmail(email)) {
             throw new IllegalArgumentException("Bu e-posta adresi zaten kayıtlı.");
         }
 
-        Role userRole = roleDAO.findByName("USER")
-                .orElseThrow(() -> new IllegalStateException("USER rolü veritabanında tanımlı değil."));
+        Role userRole = roleDAO.findByName("USER").orElseGet(() -> {
+            Role newRole = new Role();
+            newRole.setRoleName("USER");
+            roleDAO.save(newRole);
+            return newRole;
+        });
 
         User user = new User();
         user.setFullName(fullName);
@@ -128,5 +141,84 @@ public class UserService {
 
         emailService.sendVerificationEmail(email, user.getFullName(), token);
         logger.info("Doğrulama maili yeniden gönderildi | email={}", email);
+    }
+
+    @Transactional
+    public List<User> loadAllUsers()
+    {
+        logger.info("UserService.loadAllUsers()");
+        return userDAO.findAll();
+    }
+
+    @Transactional
+    public boolean setRole(long userId, long roleId)
+    {
+        logger.info("UserService.setRole() - userId={} roleId={}", userId, roleId);
+
+        User user = userDAO.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("This user doesn't exists"));
+
+        if (roleId <= 0) {
+            throw new IllegalArgumentException("Role id is invalid");
+        }
+
+        Role persistedRole = roleDAO.findById(roleId)
+                .orElseThrow(() -> new IllegalArgumentException("This role doesn't exist"));
+
+        user.setRole(persistedRole);
+        userDAO.update(user);
+        return true;
+    }
+
+    @Transactional
+    public void deleteUser(long id) {
+        logger.info("UserService.deleteUser() - id={}", id);
+
+        User user = userDAO.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("This user doesn't exist"));
+
+        userDAO.delete(user);
+    }
+
+    @Transactional
+    public void addRole(String roleName) {
+        logger.info("UserService.addRole() - role={}", roleName);
+
+        if (roleName == null || roleName.isBlank()) {
+            throw new IllegalArgumentException("Role name cannot be blank");
+        }
+
+        String normalizedRoleName = roleName.trim().toUpperCase();
+        if (roleDAO.findByName(normalizedRoleName).isPresent()) {
+            throw new IllegalArgumentException("This role already exists");
+        }
+
+        Role role = new Role();
+        role.setRoleName(normalizedRoleName);
+        roleDAO.save(role);
+    }
+
+    @Transactional
+    public void deleteRole(String roleName) {
+        logger.info("UserService.deleteRole() - role={}", roleName);
+
+        if (roleName == null || roleName.isBlank()) {
+            throw new IllegalArgumentException("Role name cannot be blank");
+        }
+
+        Role role = roleDAO.findByName(roleName.trim().toUpperCase())
+                .orElseThrow(() -> new IllegalArgumentException("This role doesn't exist"));
+
+        if (userDAO.countByRole(role) > 0) {
+            throw new IllegalArgumentException("This role is assigned to users");
+        }
+
+        roleDAO.delete(role);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Role> loadAllRoles() {
+        logger.info("UserService.loadAllRoles()");
+        return roleDAO.findAll();
     }
 }
