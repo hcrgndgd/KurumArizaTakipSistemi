@@ -1,10 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title><spring:message code="auth.register.title"/></title>
     <style>
         :root {
             --bg: #f7f3eb;
@@ -19,9 +21,7 @@
             --shadow: 0 24px 60px rgba(31, 41, 51, 0.16);
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -29,19 +29,15 @@
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text);
             background:
-                radial-gradient(circle at top right, rgba(154, 52, 18, 0.20), transparent 32%),
-                radial-gradient(circle at bottom left, rgba(14, 116, 144, 0.14), transparent 28%),
-                linear-gradient(135deg, #fcfaf6 0%, #ece3d4 100%);
+                    radial-gradient(circle at top right, rgba(154, 52, 18, 0.20), transparent 32%),
+                    radial-gradient(circle at bottom left, rgba(14, 116, 144, 0.14), transparent 28%),
+                    linear-gradient(135deg, #fcfaf6 0%, #ece3d4 100%);
             display: grid;
             place-items: center;
             padding: 24px;
         }
 
-        .shell {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
+        .shell { width: 100%; display: flex; justify-content: center; }
 
         .card {
             width: min(440px, 100%);
@@ -52,28 +48,17 @@
             box-shadow: var(--shadow);
         }
 
-        h2 {
-            margin: 0 0 12px;
-            line-height: 1.1;
-            font-size: 2rem;
-        }
+        h2 { margin: 0 0 12px; line-height: 1.1; font-size: 2rem; }
 
         .card p {
-            margin: 0;
+            margin: 0 0 24px;
             line-height: 1.6;
             color: var(--muted);
-            margin-bottom: 24px;
         }
 
-        .field {
-            margin-bottom: 16px;
-        }
+        .field { margin-bottom: 16px; }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
 
         input {
             width: 100%;
@@ -106,15 +91,8 @@
             box-shadow: 0 16px 30px rgba(154, 52, 18, 0.22);
         }
 
-        button:hover {
-            transform: translateY(-1px);
-        }
-
-        button:disabled {
-            opacity: 0.75;
-            cursor: wait;
-            transform: none;
-        }
+        button:hover { transform: translateY(-1px); }
+        button:disabled { opacity: 0.75; cursor: wait; transform: none; }
 
         .feedback {
             min-height: 24px;
@@ -123,13 +101,8 @@
             font-weight: 600;
         }
 
-        .feedback.error {
-            color: var(--danger);
-        }
-
-        .feedback.success {
-            color: var(--success);
-        }
+        .feedback.error { color: var(--danger); }
+        .feedback.success { color: var(--success); }
 
         .meta {
             margin-top: 18px;
@@ -143,50 +116,70 @@
             text-decoration: none;
         }
 
-        .meta a:hover {
-            text-decoration: underline;
+        .meta a:hover { text-decoration: underline; }
+
+        .lang-switcher {
+            text-align: right;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
         }
 
-        @media (max-width: 640px) {
-            body {
-                padding: 16px;
-            }
+        .lang-switcher a {
+            color: var(--accent-strong);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 8px;
+        }
 
-            .card {
-                padding: 28px 22px;
-                border-radius: 22px;
-            }
+        .lang-switcher a:hover { text-decoration: underline; }
+
+        @media (max-width: 640px) {
+            body { padding: 16px; }
+            .card { padding: 28px 22px; border-radius: 22px; }
         }
     </style>
 </head>
 <body>
 <main class="shell">
     <div class="card">
-        <h2>Register</h2>
-        <p>Create your new account and start using the system.</p>
+
+        <!-- Dil Değiştirme -->
+        <div class="lang-switcher">
+            <a href="?lang=tr">🇹🇷 Türkçe</a>
+            <a href="?lang=en">🇬🇧 English</a>
+        </div>
+
+        <h2><spring:message code="auth.register.title"/></h2>
+        <p><spring:message code="auth.register.subtitle"/></p>
 
         <form id="registerForm">
             <div class="field">
-                <label for="fullName">Full Name</label>
-                <input id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Full Name" required>
+                <label for="fullName"><spring:message code="auth.register.fullname"/></label>
+                <input id="fullName" name="fullName" type="text" autocomplete="name"
+                       placeholder="<spring:message code='auth.register.fullname'/>" required>
             </div>
 
             <div class="field">
-                <label for="email">Email</label>
-                <input id="email" name="email" type="email" autocomplete="email" placeholder="name@company.com" required>
+                <label for="email"><spring:message code="auth.register.email"/></label>
+                <input id="email" name="email" type="email" autocomplete="email"
+                       placeholder="name@ogr.duzce.edu.tr" required>
             </div>
 
             <div class="field">
-                <label for="password">Password</label>
-                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Choose a strong password" required>
+                <label for="password"><spring:message code="auth.register.password"/></label>
+                <input id="password" name="password" type="password" autocomplete="new-password"
+                       placeholder="••••••••" required>
             </div>
 
-            <button id="submitButton" type="submit">Create Account</button>
+            <button id="submitButton" type="submit">
+                <spring:message code="auth.register.button"/>
+            </button>
             <div id="feedback" class="feedback" aria-live="polite"></div>
         </form>
 
         <div class="meta">
-            Already have an account? <a href="login.jsp">Sign in</a>
+            <spring:message code="auth.register.login"/>
+            <a href="login"><spring:message code="auth.login.title"/></a>
         </div>
     </div>
 </main>
@@ -204,7 +197,7 @@
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
         submitButton.disabled = true;
-        setFeedback("Submitting registration...", "success");
+        setFeedback("<spring:message code='auth.register.submitting'/>", "success");
 
         const payload = {
             fullName: form.fullName.value.trim(),
@@ -215,23 +208,21 @@
         try {
             const response = await fetch("<%= request.getContextPath() %>/auth/register", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                setFeedback(data.error || "Registration failed.", "error");
+                setFeedback(data.error || "<spring:message code='auth.register.failed'/>", "error");
                 return;
             }
 
-            setFeedback(data.message || "Registration successful.", "success");
+            setFeedback(data.message || "<spring:message code='auth.register.success'/>", "success");
             form.reset();
         } catch (error) {
-            setFeedback("The server could not be reached. Please try again later.", "error");
+            setFeedback("<spring:message code='common.error'/>", "error");
         } finally {
             submitButton.disabled = false;
         }

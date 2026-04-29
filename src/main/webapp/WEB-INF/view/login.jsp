@@ -1,10 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In</title>
+    <title><spring:message code="auth.login.title"/></title>
     <style>
         :root {
             --bg: #f4f1ea;
@@ -19,9 +20,7 @@
             --shadow: 0 24px 60px rgba(31, 41, 51, 0.16);
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -29,9 +28,9 @@
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text);
             background:
-                radial-gradient(circle at top left, rgba(15, 118, 110, 0.22), transparent 34%),
-                radial-gradient(circle at bottom right, rgba(180, 83, 9, 0.18), transparent 28%),
-                linear-gradient(135deg, #f7f3eb 0%, #ebe5d8 100%);
+                    radial-gradient(circle at top left, rgba(15, 118, 110, 0.22), transparent 34%),
+                    radial-gradient(circle at bottom right, rgba(180, 83, 9, 0.18), transparent 28%),
+                    linear-gradient(135deg, #f7f3eb 0%, #ebe5d8 100%);
             display: grid;
             place-items: center;
             padding: 24px;
@@ -63,9 +62,7 @@
             line-height: 1.6;
         }
 
-        .field {
-            margin-bottom: 16px;
-        }
+        .field { margin-bottom: 16px; }
 
         label {
             display: block;
@@ -104,15 +101,8 @@
             box-shadow: 0 16px 30px rgba(15, 118, 110, 0.22);
         }
 
-        button:hover {
-            transform: translateY(-1px);
-        }
-
-        button:disabled {
-            opacity: 0.7;
-            cursor: wait;
-            transform: none;
-        }
+        button:hover { transform: translateY(-1px); }
+        button:disabled { opacity: 0.7; cursor: wait; transform: none; }
 
         .feedback {
             min-height: 24px;
@@ -121,13 +111,8 @@
             font-weight: 600;
         }
 
-        .feedback.error {
-            color: var(--danger);
-        }
-
-        .feedback.success {
-            color: var(--success);
-        }
+        .feedback.error { color: var(--danger); }
+        .feedback.success { color: var(--success); }
 
         .meta {
             margin-top: 20px;
@@ -141,45 +126,65 @@
             text-decoration: none;
         }
 
-        .meta a:hover {
-            text-decoration: underline;
+        .meta a:hover { text-decoration: underline; }
+
+        .lang-switcher {
+            text-align: right;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
         }
 
-        @media (max-width: 640px) {
-            body {
-                padding: 16px;
-            }
+        .lang-switcher a {
+            color: var(--accent-strong);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 8px;
+        }
 
-            .card {
-                padding: 28px 22px;
-                border-radius: 22px;
-            }
+        .lang-switcher a:hover { text-decoration: underline; }
+
+        @media (max-width: 640px) {
+            body { padding: 16px; }
+            .card { padding: 28px 22px; border-radius: 22px; }
         }
     </style>
 </head>
 <body>
 <main class="shell">
     <div class="card">
-        <h2>Sign In</h2>
-        <p>Enter your email address and password to continue.</p>
+
+        <!-- Dil Değiştirme -->
+        <div class="lang-switcher">
+            <a href="?lang=tr">🇹🇷 Türkçe</a>
+            <a href="?lang=en">🇬🇧 English</a>
+        </div>
+
+        <h2><spring:message code="auth.login.title"/></h2>
+        <p><spring:message code="auth.login.subtitle"/></p>
 
         <form id="loginForm">
             <div class="field">
-                <label for="email">Email</label>
-                <input id="email" name="email" type="email" autocomplete="email" placeholder="name@company.com" required>
+                <label for="email"><spring:message code="auth.login.email"/></label>
+                <input id="email" name="email" type="email" autocomplete="email"
+                       placeholder="name@company.com" required>
             </div>
 
             <div class="field">
-                <label for="password">Password</label>
-                <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+                <label for="password"><spring:message code="auth.login.password"/></label>
+                <input id="password" name="password" type="password"
+                       autocomplete="current-password"
+                       placeholder="••••••••" required>
             </div>
 
-            <button id="submitButton" type="submit">Sign In</button>
+            <button id="submitButton" type="submit">
+                <spring:message code="auth.login.button"/>
+            </button>
             <div id="feedback" class="feedback" aria-live="polite"></div>
         </form>
 
         <div class="meta">
-            " Don't have an account? <a href="register">Register</a>
+            <spring:message code="auth.login.register"/>
+            <a href="register"><spring:message code="auth.register.title"/></a>
         </div>
     </div>
 </main>
@@ -197,7 +202,7 @@
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
         submitButton.disabled = true;
-        setFeedback("Signing in...", "success");
+        setFeedback("<spring:message code='auth.login.signing'/>", "success");
 
         const payload = {
             email: form.email.value.trim(),
@@ -207,29 +212,32 @@
         try {
             const response = await fetch("<%= request.getContextPath() %>/auth/login", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                setFeedback(data.error || "Sign in failed.", "error");
+                setFeedback(data.error || "<spring:message code='auth.login.failed'/>", "error");
                 return;
             }
 
-            const name = data.fullName ? " Signed in as " + data.fullName + "." : "";
-            const role = data.role ? " Role: " + data.role + "." : "";
-            setFeedback((data.message || "Sign in successful.") + name + role, "success");
-            
-            // Redirect to profile after 1.5 seconds
+            const name = data.fullName ? " " + data.fullName : "";
+            setFeedback("<spring:message code='auth.login.success'/>" + name, "success");
+
             setTimeout(() => {
-                window.location.href = "<%= request.getContextPath() %>/user/profile";
+                const role = data.role;
+                if (role === "TECHNICIAN") {
+                    window.location.href = "<%= request.getContextPath() %>/technician/tickets";
+                } else if (role === "ADMIN") {
+                    window.location.href = "<%= request.getContextPath() %>/admin/dashboard";
+                } else {
+                    window.location.href = "<%= request.getContextPath() %>/user/profile";
+                }
             }, 1500);
         } catch (error) {
-            setFeedback("The server could not be reached. Please try again later.", "error");
+            setFeedback("<spring:message code='common.error'/>", "error");
         } finally {
             submitButton.disabled = false;
         }

@@ -47,3 +47,4 @@ logs/
 .idea/
 hibernate.properties
 ai.properties
+src/main/resources/ai.properties

@@ -1,10 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title><spring:message code="admin.title"/></title>
     <style>
         :root {
             --bg-top: #f7f3eb;
@@ -23,9 +24,7 @@
             --shadow: 0 30px 80px rgba(34, 31, 27, 0.16);
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -33,20 +32,15 @@
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text);
             background:
-                radial-gradient(circle at top left, rgba(12, 74, 110, 0.14), transparent 28%),
-                radial-gradient(circle at top right, rgba(139, 94, 52, 0.18), transparent 30%),
-                linear-gradient(155deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+                    radial-gradient(circle at top left, rgba(12, 74, 110, 0.14), transparent 28%),
+                    radial-gradient(circle at top right, rgba(139, 94, 52, 0.18), transparent 30%),
+                    linear-gradient(155deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
             padding: 28px;
         }
 
-        .page {
-            width: min(1280px, 100%);
-            margin: 0 auto;
-        }
+        .page { width: min(1280px, 100%); margin: 0 auto; }
 
-        .hero,
-        .stats-card,
-        .panel {
+        .hero, .stats-card, .panel {
             background: var(--panel);
             border: 1px solid rgba(212, 192, 161, 0.75);
             border-radius: 28px;
@@ -63,347 +57,123 @@
             gap: 20px;
         }
 
-        .hero h1 {
-            margin: 0;
-            font-size: clamp(2rem, 4vw, 3rem);
-            line-height: 0.98;
-        }
+        .hero h1 { margin: 0; font-size: clamp(2rem, 4vw, 3rem); line-height: 0.98; }
 
-        .stats-card {
-            padding: 24px;
-            display: grid;
-            gap: 16px;
-            align-content: start;
-        }
+        .lang-switcher { font-size: 0.85rem; }
+        .lang-switcher a { color: var(--accent-strong); text-decoration: none; font-weight: 600; margin-left: 8px; }
+        .lang-switcher a:hover { text-decoration: underline; }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-        }
+        .stats-card { padding: 24px; display: grid; gap: 16px; align-content: start; }
 
-        .stat {
-            background: var(--panel-strong);
-            border: 1px solid rgba(212, 192, 161, 0.68);
-            border-radius: 20px;
-            padding: 18px;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 
-        .stat .label {
-            display: block;
-            font-size: 0.82rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-            margin-bottom: 8px;
-        }
+        .stat { background: var(--panel-strong); border: 1px solid rgba(212, 192, 161, 0.68); border-radius: 20px; padding: 18px; }
+        .stat .label { display: block; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
+        .stat .value { font-size: 1.8rem; font-weight: 700; }
 
-        .stat .value {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
+        .content { display: grid; grid-template-columns: 1.8fr 1fr; gap: 20px; }
+        .panel { padding: 24px; }
 
-        .content {
-            display: grid;
-            grid-template-columns: 1.8fr 1fr;
-            gap: 20px;
-        }
+        .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+        .panel-head h2 { margin: 0; font-size: 1.45rem; }
+        .panel-head p { margin: 6px 0 0; color: var(--muted); }
 
-        .panel {
-            padding: 24px;
-        }
+        .toolbar { display: flex; gap: 10px; align-items: center; }
 
-        .panel-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 18px;
-        }
+        .table-wrap { overflow: auto; border: 1px solid rgba(212, 192, 161, 0.7); border-radius: 22px; background: rgba(255, 255, 255, 0.58); }
 
-        .panel-head h2 {
-            margin: 0;
-            font-size: 1.45rem;
-        }
+        table { width: 100%; border-collapse: collapse; min-width: 760px; }
 
-        .panel-head p {
-            margin: 6px 0 0;
-            color: var(--muted);
-        }
+        th, td { text-align: left; padding: 16px 18px; border-bottom: 1px solid rgba(212, 192, 161, 0.55); vertical-align: middle; }
 
-        .toolbar {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        th { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); background: rgba(255, 248, 236, 0.85); }
 
-        .table-wrap {
-            overflow: auto;
-            border: 1px solid rgba(212, 192, 161, 0.7);
-            border-radius: 22px;
-            background: rgba(255, 255, 255, 0.58);
-        }
+        tbody tr:hover { background: rgba(139, 94, 52, 0.05); }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 760px;
-        }
+        .user-main { font-weight: 700; margin-bottom: 4px; }
+        .user-sub { color: var(--muted); font-size: 0.92rem; }
 
-        th,
-        td {
-            text-align: left;
-            padding: 16px 18px;
-            border-bottom: 1px solid rgba(212, 192, 161, 0.55);
-            vertical-align: middle;
-        }
+        .pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 7px 12px; font-size: 0.83rem; font-weight: 700; letter-spacing: 0.03em; border: 1px solid transparent; }
+        .pill.success { color: var(--success); background: rgba(29, 122, 70, 0.12); border-color: rgba(29, 122, 70, 0.18); }
+        .pill.warn { color: var(--danger); background: rgba(163, 49, 31, 0.12); border-color: rgba(163, 49, 31, 0.18); }
 
-        th {
-            font-size: 0.82rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-            background: rgba(255, 248, 236, 0.85);
-        }
+        .role-cell { display: flex; gap: 10px; align-items: center; }
+        .stack { display: grid; gap: 18px; }
+        .role-list { display: grid; gap: 12px; }
 
-        tbody tr:hover {
-            background: rgba(139, 94, 52, 0.05);
-        }
+        .role-card { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 20px; background: var(--panel-strong); border: 1px solid rgba(212, 192, 161, 0.68); }
 
-        .user-main {
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
+        .role-name { font-weight: 700; margin-bottom: 4px; }
+        .role-meta { color: var(--muted); font-size: 0.92rem; }
 
-        .user-sub {
-            color: var(--muted);
-            font-size: 0.92rem;
-        }
+        .field-group { display: grid; gap: 12px; }
 
-        .pill {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            padding: 7px 12px;
-            font-size: 0.83rem;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-            border: 1px solid transparent;
-        }
+        label { display: block; margin-bottom: 8px; font-size: 0.92rem; font-weight: 700; }
 
-        .pill.success {
-            color: var(--success);
-            background: rgba(29, 122, 70, 0.12);
-            border-color: rgba(29, 122, 70, 0.18);
-        }
+        input, select, button { font: inherit; }
 
-        .pill.warn {
-            color: var(--danger);
-            background: rgba(163, 49, 31, 0.12);
-            border-color: rgba(163, 49, 31, 0.18);
-        }
+        input, select { width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.9); color: var(--text); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
 
-        .role-cell {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 
-        .stack {
-            display: grid;
-            gap: 18px;
-        }
+        button { border: 0; border-radius: 14px; padding: 12px 16px; font-weight: 700; cursor: pointer; transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease; }
+        button:hover { transform: translateY(-1px); }
+        button:disabled { opacity: 0.68; cursor: wait; transform: none; }
 
-        .role-list {
-            display: grid;
-            gap: 12px;
-        }
+        .primary-btn { color: #fffaf3; background: linear-gradient(135deg, var(--accent), var(--accent-strong)); box-shadow: 0 14px 26px rgba(109, 71, 36, 0.24); }
+        .secondary-btn { color: var(--accent-strong); background: rgba(139, 94, 52, 0.1); }
+        .danger-btn { color: var(--danger); background: var(--danger-soft); }
+        .mini-btn { padding: 10px 12px; border-radius: 12px; white-space: nowrap; }
 
-        .role-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 14px;
-            padding: 16px 18px;
-            border-radius: 20px;
-            background: var(--panel-strong);
-            border: 1px solid rgba(212, 192, 161, 0.68);
-        }
+        .feedback { min-height: 24px; font-weight: 700; }
+        .feedback.success { color: var(--success); }
+        .feedback.error { color: var(--danger); }
 
-        .role-name {
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
+        .empty { padding: 22px; border: 1px dashed rgba(212, 192, 161, 0.9); border-radius: 18px; color: var(--muted); text-align: center; background: rgba(255, 250, 243, 0.7); }
 
-        .role-meta {
-            color: var(--muted);
-            font-size: 0.92rem;
-        }
-
-        .field-group {
-            display: grid;
-            gap: 12px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.92rem;
-            font-weight: 700;
-        }
-
-        input,
-        select,
-        button {
-            font: inherit;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 13px 14px;
-            border-radius: 14px;
-            border: 1px solid var(--line);
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px var(--accent-soft);
-        }
-
-        button {
-            border: 0;
-            border-radius: 14px;
-            padding: 12px 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        button:hover {
-            transform: translateY(-1px);
-        }
-
-        button:disabled {
-            opacity: 0.68;
-            cursor: wait;
-            transform: none;
-        }
-
-        .primary-btn {
-            color: #fffaf3;
-            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-            box-shadow: 0 14px 26px rgba(109, 71, 36, 0.24);
-        }
-
-        .secondary-btn {
-            color: var(--accent-strong);
-            background: rgba(139, 94, 52, 0.1);
-        }
-
-        .danger-btn {
-            color: var(--danger);
-            background: var(--danger-soft);
-        }
-
-        .mini-btn {
-            padding: 10px 12px;
-            border-radius: 12px;
-            white-space: nowrap;
-        }
-
-        .feedback {
-            min-height: 24px;
-            font-weight: 700;
-        }
-
-        .feedback.success {
-            color: var(--success);
-        }
-
-        .feedback.error {
-            color: var(--danger);
-        }
-
-        .empty {
-            padding: 22px;
-            border: 1px dashed rgba(212, 192, 161, 0.9);
-            border-radius: 18px;
-            color: var(--muted);
-            text-align: center;
-            background: rgba(255, 250, 243, 0.7);
-        }
-
-        @media (max-width: 1080px) {
-            .content {
-                grid-template-columns: 1fr;
-            }
-
-            .hero {
-                display: grid;
-            }
-        }
-
+        @media (max-width: 1080px) { .content { grid-template-columns: 1fr; } .hero { display: grid; } }
         @media (max-width: 720px) {
-            body {
-                padding: 16px;
-            }
-
-            .hero,
-            .stats-card,
-            .panel {
-                border-radius: 22px;
-            }
-
-            .toolbar {
-                width: 100%;
-                justify-content: stretch;
-            }
-
-            .toolbar button {
-                width: 100%;
-            }
-
-            .role-card {
-                align-items: flex-start;
-                flex-direction: column;
-            }
+            body { padding: 16px; }
+            .hero, .stats-card, .panel { border-radius: 22px; }
+            .toolbar { width: 100%; justify-content: stretch; }
+            .toolbar button { width: 100%; }
+            .role-card { align-items: flex-start; flex-direction: column; }
         }
     </style>
 </head>
 <body>
 <div class="page">
+
     <section class="hero">
-        <h1>Admin control panel</h1>
+        <h1><spring:message code="admin.title"/></h1>
+        <div class="lang-switcher">
+            <a href="?lang=tr">🇹🇷 Türkçe</a>
+            <a href="?lang=en">🇬🇧 English</a>
+        </div>
     </section>
 
     <section class="stats-card" style="margin-bottom: 22px;">
         <div class="panel-head">
             <div>
-                <h2>Snapshot</h2>
-                <p>Current totals from the live admin API.</p>
+                <h2><spring:message code="admin.snapshot"/></h2>
+                <p><spring:message code="admin.snapshot.desc"/></p>
             </div>
         </div>
         <div class="stats-grid">
             <div class="stat">
-                <span class="label">Users</span>
+                <span class="label"><spring:message code="admin.users"/></span>
                 <span class="value" id="userCount">0</span>
             </div>
             <div class="stat">
-                <span class="label">Verified</span>
+                <span class="label"><spring:message code="admin.verified"/></span>
                 <span class="value" id="verifiedCount">0</span>
             </div>
             <div class="stat">
-                <span class="label">Roles</span>
+                <span class="label"><spring:message code="admin.roles"/></span>
                 <span class="value" id="roleCount">0</span>
             </div>
             <div class="stat">
-                <span class="label">Unassigned</span>
+                <span class="label"><spring:message code="admin.unassigned"/></span>
                 <span class="value" id="unassignedCount">0</span>
             </div>
         </div>
@@ -413,11 +183,13 @@
         <div class="panel">
             <div class="panel-head">
                 <div>
-                    <h2>User directory</h2>
-                    <p>Update a user's role inline or remove the account.</p>
+                    <h2><spring:message code="admin.user.directory"/></h2>
+                    <p><spring:message code="admin.user.directory.desc"/></p>
                 </div>
                 <div class="toolbar">
-                    <button id="refreshUsersButton" class="secondary-btn" type="button">Refresh list</button>
+                    <button id="refreshUsersButton" class="secondary-btn" type="button">
+                        <spring:message code="admin.refresh"/>
+                    </button>
                 </div>
             </div>
 
@@ -425,16 +197,16 @@
                 <table>
                     <thead>
                     <tr>
-                        <th>User</th>
-                        <th>Status</th>
-                        <th>Role</th>
-                        <th>Actions</th>
+                        <th><spring:message code="admin.user"/></th>
+                        <th><spring:message code="admin.status"/></th>
+                        <th><spring:message code="admin.role"/></th>
+                        <th><spring:message code="admin.actions"/></th>
                     </tr>
                     </thead>
                     <tbody id="usersTableBody">
                     <tr>
                         <td colspan="4">
-                            <div class="empty">Loading users...</div>
+                            <div class="empty"><spring:message code="admin.loading.users"/></div>
                         </td>
                     </tr>
                     </tbody>
@@ -447,12 +219,12 @@
             <div class="panel">
                 <div class="panel-head">
                     <div>
-                        <h2>Role library</h2>
-                        <p>See active roles and remove roles that are no longer used.</p>
+                        <h2><spring:message code="admin.role.library"/></h2>
+                        <p><spring:message code="admin.role.library.desc"/></p>
                     </div>
                 </div>
                 <div id="rolesList" class="role-list">
-                    <div class="empty">Loading roles...</div>
+                    <div class="empty"><spring:message code="admin.loading.roles"/></div>
                 </div>
                 <p id="rolesFeedback" class="feedback" aria-live="polite"></p>
             </div>
@@ -460,16 +232,19 @@
             <div class="panel">
                 <div class="panel-head">
                     <div>
-                        <h2>Create role</h2>
-                        <p>Add a new system role and make it available immediately.</p>
+                        <h2><spring:message code="admin.create.role"/></h2>
+                        <p><spring:message code="admin.create.role.desc"/></p>
                     </div>
                 </div>
                 <form id="addRoleForm" class="field-group">
                     <div>
-                        <label for="newRoleName">Role name</label>
-                        <input id="newRoleName" name="role" type="text" maxlength="50" placeholder="Example: SUPPORT_LEAD" required>
+                        <label for="newRoleName"><spring:message code="admin.role.name"/></label>
+                        <input id="newRoleName" name="role" type="text" maxlength="50"
+                               placeholder="Example: SUPPORT_LEAD" required>
                     </div>
-                    <button id="addRoleButton" class="primary-btn" type="submit">Add role</button>
+                    <button id="addRoleButton" class="primary-btn" type="submit">
+                        <spring:message code="admin.add.role"/>
+                    </button>
                     <p id="addRoleFeedback" class="feedback" aria-live="polite"></p>
                 </form>
             </div>
@@ -480,6 +255,24 @@
 <script>
     const contextPath = "<%= request.getContextPath() %>";
 
+    // ← Dil metinleri JSP'den JS'e aktarılıyor
+    const i18n = {
+        verified: "<spring:message code='admin.status.verified'/>",
+        pending: "<spring:message code='admin.status.pending'/>",
+        save: "<spring:message code='admin.save'/>",
+        delete: "<spring:message code='admin.delete'/>",
+        assignedUsers: "<spring:message code='admin.assigned.users'/>",
+        noUsers: "<spring:message code='admin.no.users'/>",
+        noRoles: "<spring:message code='admin.no.roles'/>",
+        roleRequired: "<spring:message code='admin.role.required'/>",
+        roleAdded: "<spring:message code='admin.role.added'/>",
+        roleDeleted: "<spring:message code='admin.role.deleted'/>",
+        userDeleted: "<spring:message code='admin.user.deleted'/>",
+        roleUpdated: "<spring:message code='admin.role.updated'/>",
+        confirmDelete: "<spring:message code='admin.confirm.delete'/>",
+        confirmDeleteRole: "<spring:message code='admin.confirm.delete.role'/>"
+    };
+
     const usersTableBody = document.getElementById("usersTableBody");
     const rolesList = document.getElementById("rolesList");
     const usersFeedback = document.getElementById("usersFeedback");
@@ -488,7 +281,6 @@
     const addRoleForm = document.getElementById("addRoleForm");
     const addRoleButton = document.getElementById("addRoleButton");
     const refreshUsersButton = document.getElementById("refreshUsersButton");
-
     const userCount = document.getElementById("userCount");
     const verifiedCount = document.getElementById("verifiedCount");
     const roleCount = document.getElementById("roleCount");
@@ -505,43 +297,26 @@
     async function readJson(response) {
         const text = await response.text();
         const contentType = response.headers.get("Content-Type") || "";
-
-        if (!text) {
-            return null;
-        }
-
-        if (contentType.includes("application/json")) {
-            return JSON.parse(text);
-        }
-
-        return {
-            rawText: text
-        };
+        if (!text) return null;
+        if (contentType.includes("application/json")) return JSON.parse(text);
+        return { rawText: text };
     }
 
     async function request(url, options) {
         const response = await fetch(url, options);
         const data = await readJson(response);
-
         if (!response.ok) {
             const message = data && (data.error || data.message)
                 ? (data.error || data.message)
                 : "Request failed with status " + response.status + ".";
             throw new Error(message);
         }
-
         return data;
     }
 
     function updateStats() {
-        const verifiedUsers = users.filter(function (user) {
-            return user.verified;
-        }).length;
-
-        const usersWithoutRole = users.filter(function (user) {
-            return !user.roleName;
-        }).length;
-
+        const verifiedUsers = users.filter(u => u.verified).length;
+        const usersWithoutRole = users.filter(u => !u.roleName).length;
         userCount.textContent = String(users.length);
         verifiedCount.textContent = String(verifiedUsers);
         roleCount.textContent = String(roles.length);
@@ -549,7 +324,7 @@
     }
 
     function buildRoleOptions(selectedRoleId) {
-        return roles.map(function (role) {
+        return roles.map(role => {
             const selected = String(role.roleId) === String(selectedRoleId) ? " selected" : "";
             return '<option value="' + role.roleId + '"' + selected + ">" + role.roleName + "</option>";
         }).join("");
@@ -557,34 +332,23 @@
 
     function renderUsers() {
         if (!users.length) {
-            usersTableBody.innerHTML = '<tr><td colspan="4"><div class="empty">No users found.</div></td></tr>';
+            usersTableBody.innerHTML = '<tr><td colspan="4"><div class="empty">' + i18n.noUsers + '</div></td></tr>';
             updateStats();
             return;
         }
 
-        usersTableBody.innerHTML = users.map(function (user) {
+        usersTableBody.innerHTML = users.map(user => {
             const verifiedMarkup = user.verified
-                ? '<span class="pill success">Verified</span>'
-                : '<span class="pill warn">Pending</span>';
+                ? '<span class="pill success">' + i18n.verified + '</span>'
+                : '<span class="pill warn">' + i18n.pending + '</span>';
 
-            return '' +
-                '<tr data-user-id="' + user.userId + '">' +
-                '  <td>' +
-                '    <div class="user-main">' + escapeHtml(user.fullName || "Unnamed user") + '</div>' +
-                '    <div class="user-sub">' + escapeHtml(user.email || "-") + ' | ID ' + escapeHtml(String(user.userId)) + '</div>' +
-                '  </td>' +
-                '  <td>' + verifiedMarkup + '</td>' +
-                '  <td>' +
-                '    <div class="role-cell">' +
-                '      <select class="role-select" aria-label="Select role for user">' +
-                buildRoleOptions(user.roleId) +
-                '      </select>' +
-                '      <button class="mini-btn secondary-btn save-role-btn" type="button">Save</button>' +
-                '    </div>' +
-                '  </td>' +
-                '  <td>' +
-                '    <button class="mini-btn danger-btn delete-user-btn" type="button">Delete user</button>' +
-                '  </td>' +
+            return '<tr data-user-id="' + user.userId + '">' +
+                '<td><div class="user-main">' + escapeHtml(user.fullName || "Unnamed user") + '</div>' +
+                '<div class="user-sub">' + escapeHtml(user.email || "-") + ' | ID ' + user.userId + '</div></td>' +
+                '<td>' + verifiedMarkup + '</td>' +
+                '<td><div class="role-cell"><select class="role-select">' + buildRoleOptions(user.roleId) + '</select>' +
+                '<button class="mini-btn secondary-btn save-role-btn" type="button">' + i18n.save + '</button></div></td>' +
+                '<td><button class="mini-btn danger-btn delete-user-btn" type="button">' + i18n.delete + '</button></td>' +
                 '</tr>';
         }).join("");
 
@@ -593,34 +357,27 @@
 
     function renderRoles() {
         if (!roles.length) {
-            rolesList.innerHTML = '<div class="empty">No roles found.</div>';
+            rolesList.innerHTML = '<div class="empty">' + i18n.noRoles + '</div>';
             updateStats();
             return;
         }
 
-        rolesList.innerHTML = roles.map(function (role) {
+        rolesList.innerHTML = roles.map(role => {
             const deleteDisabled = role.userCount > 0 ? " disabled" : "";
-            const deleteTitle = role.userCount > 0 ? "Cannot delete a role that is assigned to users." : "Delete role";
-
-            return '' +
-                '<div class="role-card">' +
-                '  <div>' +
-                '    <div class="role-name">' + escapeHtml(role.roleName) + '</div>' +
-                '    <div class="role-meta">' + escapeHtml(String(role.userCount)) + ' assigned users</div>' +
-                '  </div>' +
-                '  <button class="mini-btn danger-btn delete-role-btn" type="button" data-role-name="' + escapeHtml(role.roleName) + '" title="' + escapeHtml(deleteTitle) + '"' + deleteDisabled + '>Delete</button>' +
-                '</div>';
+            return '<div class="role-card"><div>' +
+                '<div class="role-name">' + escapeHtml(role.roleName) + '</div>' +
+                '<div class="role-meta">' + role.userCount + ' ' + i18n.assignedUsers + '</div></div>' +
+                '<button class="mini-btn danger-btn delete-role-btn" type="button" data-role-name="' +
+                escapeHtml(role.roleName) + '"' + deleteDisabled + '>' + i18n.delete + '</button></div>';
         }).join("");
 
         updateStats();
     }
 
     async function loadUsers() {
-        setFeedback(usersFeedback, "Loading users...", "success");
         try {
             users = await request(contextPath + "/admin/users");
             renderUsers();
-            setFeedback(usersFeedback, "Users loaded.", "success");
         } catch (error) {
             usersTableBody.innerHTML = '<tr><td colspan="4"><div class="empty">Failed to load users.</div></td></tr>';
             setFeedback(usersFeedback, error.message, "error");
@@ -628,12 +385,10 @@
     }
 
     async function loadRoles() {
-        setFeedback(rolesFeedback, "Loading roles...", "success");
         try {
             roles = await request(contextPath + "/admin/roles");
             renderRoles();
             renderUsers();
-            setFeedback(rolesFeedback, "Roles loaded.", "success");
         } catch (error) {
             rolesList.innerHTML = '<div class="empty">Failed to load roles.</div>';
             setFeedback(rolesFeedback, error.message, "error");
@@ -646,14 +401,9 @@
 
     async function saveUserRole(userId, roleId, button) {
         button.disabled = true;
-        setFeedback(usersFeedback, "Updating role...", "success");
-
         try {
-            await request(contextPath + "/admin/users/" + userId + "/role/" + roleId, {
-                method: "PUT"
-            });
-
-            setFeedback(usersFeedback, "Role updated successfully.", "success");
+            await request(contextPath + "/admin/users/" + userId + "/role/" + roleId, { method: "PUT" });
+            setFeedback(usersFeedback, i18n.roleUpdated, "success");
             await refreshDashboard();
         } catch (error) {
             setFeedback(usersFeedback, error.message, "error");
@@ -663,19 +413,11 @@
     }
 
     async function deleteUser(userId, button) {
-        if (!window.confirm("Delete this user permanently?")) {
-            return;
-        }
-
+        if (!window.confirm(i18n.confirmDelete)) return;
         button.disabled = true;
-        setFeedback(usersFeedback, "Deleting user...", "success");
-
         try {
-            await request(contextPath + "/admin/users/" + userId, {
-                method: "DELETE"
-            });
-
-            setFeedback(usersFeedback, "User deleted successfully.", "success");
+            await request(contextPath + "/admin/users/" + userId, { method: "DELETE" });
+            setFeedback(usersFeedback, i18n.userDeleted, "success");
             await refreshDashboard();
         } catch (error) {
             setFeedback(usersFeedback, error.message, "error");
@@ -685,23 +427,15 @@
     }
 
     async function deleteRole(roleName, button) {
-        if (!window.confirm("Delete role " + roleName + "?")) {
-            return;
-        }
-
+        if (!window.confirm(i18n.confirmDeleteRole + " " + roleName + "?")) return;
         button.disabled = true;
-        setFeedback(rolesFeedback, "Deleting role...", "success");
-
         try {
             await request(contextPath + "/admin/roles", {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ roleName: roleName })
             });
-
-            setFeedback(rolesFeedback, "Role deleted successfully.", "success");
+            setFeedback(rolesFeedback, i18n.roleDeleted, "success");
             await refreshDashboard();
         } catch (error) {
             setFeedback(rolesFeedback, error.message, "error");
@@ -712,41 +446,25 @@
 
     function escapeHtml(value) {
         return String(value)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
-    refreshUsersButton.addEventListener("click", function () {
-        refreshDashboard();
-    });
+    refreshUsersButton.addEventListener("click", () => refreshDashboard());
 
     addRoleForm.addEventListener("submit", async function (event) {
         event.preventDefault();
-        const formData = new FormData(addRoleForm);
-        const roleName = String(formData.get("role") || "").trim();
-
-        if (!roleName) {
-            setFeedback(addRoleFeedback, "Role name is required.", "error");
-            return;
-        }
-
+        const roleName = String(new FormData(addRoleForm).get("role") || "").trim();
+        if (!roleName) { setFeedback(addRoleFeedback, i18n.roleRequired, "error"); return; }
         addRoleButton.disabled = true;
-        setFeedback(addRoleFeedback, "Adding role...", "success");
-
         try {
             await request(contextPath + "/admin/roles", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ role: roleName })
             });
-
             addRoleForm.reset();
-            setFeedback(addRoleFeedback, "Role added successfully.", "success");
+            setFeedback(addRoleFeedback, i18n.roleAdded, "success");
             await refreshDashboard();
         } catch (error) {
             setFeedback(addRoleFeedback, error.message, "error");
@@ -759,28 +477,18 @@
         const saveButton = event.target.closest(".save-role-btn");
         if (saveButton) {
             const row = saveButton.closest("tr");
-            const userId = row.getAttribute("data-user-id");
-            const roleSelect = row.querySelector(".role-select");
-            saveUserRole(userId, roleSelect.value, saveButton);
+            saveUserRole(row.getAttribute("data-user-id"), row.querySelector(".role-select").value, saveButton);
             return;
         }
-
         const deleteButton = event.target.closest(".delete-user-btn");
         if (deleteButton) {
-            const row = deleteButton.closest("tr");
-            const userId = row.getAttribute("data-user-id");
-            deleteUser(userId, deleteButton);
+            deleteUser(deleteButton.closest("tr").getAttribute("data-user-id"), deleteButton);
         }
     });
 
     rolesList.addEventListener("click", function (event) {
         const button = event.target.closest(".delete-role-btn");
-        if (!button) {
-            return;
-        }
-
-        const roleName = button.getAttribute("data-role-name");
-        deleteRole(roleName, button);
+        if (button) deleteRole(button.getAttribute("data-role-name"), button);
     });
 
     refreshDashboard();

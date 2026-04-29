@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <%@ taglib uri="jakarta.tags.functions" prefix="fn" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -21,9 +22,7 @@
             --shadow: 0 24px 60px rgba(31, 41, 51, 0.16);
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -31,16 +30,13 @@
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text);
             background:
-                radial-gradient(circle at top left, rgba(15, 118, 110, 0.22), transparent 34%),
-                radial-gradient(circle at bottom right, rgba(180, 83, 9, 0.18), transparent 28%),
-                linear-gradient(135deg, #f7f3eb 0%, #ebe5d8 100%);
+                    radial-gradient(circle at top left, rgba(15, 118, 110, 0.22), transparent 34%),
+                    radial-gradient(circle at bottom right, rgba(180, 83, 9, 0.18), transparent 28%),
+                    linear-gradient(135deg, #f7f3eb 0%, #ebe5d8 100%);
             padding: 24px;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
+        .container { max-width: 900px; margin: 0 auto; }
 
         .header {
             display: flex;
@@ -54,10 +50,17 @@
             box-shadow: var(--shadow);
         }
 
-        .header h1 {
-            margin: 0;
-            font-size: 1.8rem;
+        .header h1 { margin: 0; font-size: 1.8rem; }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+
+        .lang-switcher { font-size: 0.85rem; }
+        .lang-switcher a {
+            color: var(--accent-strong);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 8px;
         }
+        .lang-switcher a:hover { text-decoration: underline; }
 
         .btn {
             display: inline-block;
@@ -71,14 +74,8 @@
             transition: transform 0.2s ease;
         }
 
-        .btn-secondary {
-            color: var(--text);
-            background: var(--line);
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-1px);
-        }
+        .btn-secondary { color: var(--text); background: var(--line); }
+        .btn-secondary:hover { transform: translateY(-1px); }
 
         .detail-card {
             background: var(--panel);
@@ -89,13 +86,8 @@
             margin-bottom: 24px;
         }
 
-        .detail-section {
-            margin-bottom: 24px;
-        }
-
-        .detail-section:last-child {
-            margin-bottom: 0;
-        }
+        .detail-section { margin-bottom: 24px; }
+        .detail-section:last-child { margin-bottom: 0; }
 
         .section-title {
             font-size: 0.85rem;
@@ -106,21 +98,7 @@
             margin-bottom: 8px;
         }
 
-        .section-content {
-            font-size: 1.1rem;
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        .section-content a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .section-content a:hover {
-            text-decoration: underline;
-        }
+        .section-content { font-size: 1.1rem; color: var(--text); line-height: 1.6; }
 
         .meta-grid {
             display: grid;
@@ -147,11 +125,7 @@
             margin-bottom: 4px;
         }
 
-        .meta-value {
-            font-size: 1rem;
-            color: var(--text);
-            font-weight: 600;
-        }
+        .meta-value { font-size: 1rem; color: var(--text); font-weight: 600; }
 
         .status-badge {
             display: inline-block;
@@ -161,20 +135,9 @@
             font-weight: 700;
         }
 
-        .status-open {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-closed {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .status-in-progress {
-            background: #bfdbfe;
-            color: #1e40af;
-        }
+        .status-open { background: #fef3c7; color: #92400e; }
+        .status-closed { background: #dcfce7; color: #15803d; }
+        .status-in-progress { background: #bfdbfe; color: #1e40af; }
 
         .back-link {
             display: inline-block;
@@ -184,32 +147,14 @@
             font-weight: 600;
         }
 
-        .back-link:hover {
-            text-decoration: underline;
-        }
+        .back-link:hover { text-decoration: underline; }
 
         @media (max-width: 640px) {
-            body {
-                padding: 12px;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 16px;
-                padding: 16px;
-            }
-
-            .header h1 {
-                font-size: 1.3rem;
-            }
-
-            .detail-card {
-                padding: 16px;
-            }
-
-            .meta-grid {
-                grid-template-columns: 1fr;
-            }
+            body { padding: 12px; }
+            .header { flex-direction: column; gap: 16px; padding: 16px; }
+            .header h1 { font-size: 1.3rem; }
+            .detail-card { padding: 16px; }
+            .meta-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -217,79 +162,85 @@
 <div class="container">
     <div class="header">
         <h1>🎫 Ticket #${ticket.ticketId}</h1>
-        <a href="${pageContext.request.contextPath}/user/tickets" class="btn btn-secondary">← Listeye Dön</a>
+        <div class="header-actions">
+            <div class="lang-switcher">
+                <a href="?lang=tr">🇹🇷 Türkçe</a>
+                <a href="?lang=en">🇬🇧 English</a>
+            </div>
+            <a href="${pageContext.request.contextPath}/user/tickets" class="btn btn-secondary">
+                ← <spring:message code="ticket.detail.back"/>
+            </a>
+        </div>
     </div>
 
     <div class="detail-card">
         <!-- Başlık -->
         <div class="detail-section">
-            <div class="section-title">Başlık</div>
+            <div class="section-title"><spring:message code="ticket.title"/></div>
             <div class="section-content">${ticket.title}</div>
         </div>
 
         <!-- Açıklama -->
         <div class="detail-section">
-            <div class="section-title">Açıklama</div>
+            <div class="section-title"><spring:message code="ticket.description"/></div>
             <div class="section-content" style="white-space: pre-wrap;">${ticket.description}</div>
         </div>
 
         <!-- Meta Bilgiler -->
         <div class="meta-grid">
             <div class="meta-item">
-                <div class="meta-label">Durum</div>
+                <div class="meta-label"><spring:message code="ticket.status"/></div>
                 <div class="meta-value">
                     <c:choose>
                         <c:when test="${not empty ticket.status}">
-                            <span class="status-badge status-${fn:toLowerCase(ticket.status.statusName)}">
-                                ${ticket.status.statusName}
-                            </span>
+              <span class="status-badge status-${fn:toLowerCase(ticket.status.statusName)}">
+                      ${ticket.status.statusName}
+              </span>
                         </c:when>
                         <c:otherwise>
-                            <span class="status-badge status-open">AÇIK</span>
+                            <span class="status-badge status-open"><spring:message code="ticket.status.open"/></span>
                         </c:otherwise>
                     </c:choose>
                 </div>
             </div>
 
             <div class="meta-item">
-                <div class="meta-label">Kategori</div>
+                <div class="meta-label"><spring:message code="ticket.category"/></div>
                 <div class="meta-value">
                     <c:choose>
-                        <c:when test="${not empty ticket.category}">
-                            ${ticket.category.categoryName}
-                        </c:when>
+                        <c:when test="${not empty ticket.category}">${ticket.category.categoryName}</c:when>
                         <c:otherwise>-</c:otherwise>
                     </c:choose>
                 </div>
             </div>
 
             <div class="meta-item">
-                <div class="meta-label">Oluşturma Tarihi</div>
+                <div class="meta-label"><spring:message code="ticket.created.at"/></div>
                 <div class="meta-value">${ticket.createdAt}</div>
             </div>
 
             <div class="meta-item">
-                <div class="meta-label">Son Güncelleme</div>
+                <div class="meta-label"><spring:message code="ticket.updated.at"/></div>
                 <div class="meta-value">
                     <c:choose>
-                        <c:when test="${not empty ticket.updatedAt}">
-                            ${ticket.updatedAt}
-                        </c:when>
-                        <c:otherwise>Güncellenmemiş</c:otherwise>
+                        <c:when test="${not empty ticket.updatedAt}">${ticket.updatedAt}</c:when>
+                        <c:otherwise><spring:message code="ticket.not.updated"/></c:otherwise>
                     </c:choose>
                 </div>
             </div>
 
             <c:if test="${not empty ticket.assignedTechnician}">
                 <div class="meta-item">
-                    <div class="meta-label">Atanan Teknisyen</div>
+                    <div class="meta-label"><spring:message code="ticket.assigned.technician"/></div>
                     <div class="meta-value">${ticket.assignedTechnician.fullName}</div>
                 </div>
             </c:if>
         </div>
     </div>
 
-    <a href="${pageContext.request.contextPath}/user/tickets" class="back-link">← Ticket Listesine Dön</a>
+    <a href="${pageContext.request.contextPath}/user/tickets" class="back-link">
+        ← <spring:message code="ticket.detail.back.list"/>
+    </a>
 </div>
 </body>
 </html>

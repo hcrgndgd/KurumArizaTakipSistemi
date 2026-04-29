@@ -243,4 +243,19 @@ public class TicketService {
         logger.info("TicketService.getTicketCountByUserId() - userId={}", userId);
         return ticketDAO.countByRequesterId(userId);
     }
+
+
+
+    @Transactional
+    public void unassignTicket(Integer ticketId) {
+        logger.info("TicketService.unassignTicket() - ticketId={}", ticketId);
+        Ticket ticket = ticketDAO.findById(ticketId)
+                .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
+        ticket.setAssignedTechnician(null);
+        ticket.setUpdatedAt(LocalDateTime.now());
+        ticketDAO.update(ticket);
+    }
+
+
+
 }

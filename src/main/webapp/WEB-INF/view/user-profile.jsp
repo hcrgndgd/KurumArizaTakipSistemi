@@ -1,11 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.JavaProje.KurumArizaTakipSistemi.model.User" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile</title>
+    <title><spring:message code="profile.title"/></title>
     <style>
         :root {
             --bg: #f4f1ea;
@@ -20,9 +21,7 @@
             --shadow: 0 24px 60px rgba(31, 41, 51, 0.16);
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -30,16 +29,13 @@
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text);
             background:
-                radial-gradient(circle at top left, rgba(15, 118, 110, 0.22), transparent 34%),
-                radial-gradient(circle at bottom right, rgba(180, 83, 9, 0.18), transparent 28%),
-                linear-gradient(135deg, #f7f3eb 0%, #ebe5d8 100%);
+                    radial-gradient(circle at top left, rgba(15, 118, 110, 0.22), transparent 34%),
+                    radial-gradient(circle at bottom right, rgba(180, 83, 9, 0.18), transparent 28%),
+                    linear-gradient(135deg, #f7f3eb 0%, #ebe5d8 100%);
             padding: 24px;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        .container { max-width: 800px; margin: 0 auto; }
 
         .header {
             display: flex;
@@ -53,15 +49,8 @@
             box-shadow: var(--shadow);
         }
 
-        .header-title {
-            margin: 0;
-            font-size: 1.8rem;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
+        .header-title { margin: 0; font-size: 1.8rem; }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
 
         .user-info {
             background: var(--panel);
@@ -72,9 +61,7 @@
             margin-bottom: 32px;
         }
 
-        .info-group {
-            margin-bottom: 24px;
-        }
+        .info-group { margin-bottom: 24px; }
 
         .info-group label {
             display: block;
@@ -117,18 +104,8 @@
             box-shadow: 0 28px 70px rgba(31, 41, 51, 0.18);
         }
 
-        .action-card h3 {
-            margin: 0 0 16px;
-            font-size: 1.1rem;
-            color: var(--text);
-        }
-
-        .action-card p {
-            margin: 0 0 16px;
-            color: var(--muted);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
+        .action-card h3 { margin: 0 0 16px; font-size: 1.1rem; color: var(--text); }
+        .action-card p { margin: 0 0 16px; color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
 
         .btn {
             display: inline-block;
@@ -150,9 +127,7 @@
             box-shadow: 0 16px 30px rgba(15, 118, 110, 0.22);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-1px);
-        }
+        .btn-primary:hover { transform: translateY(-1px); }
 
         .btn-danger {
             color: #f8fafc;
@@ -160,15 +135,8 @@
             box-shadow: 0 16px 30px rgba(180, 35, 24, 0.22);
         }
 
-        .btn-danger:hover {
-            transform: translateY(-1px);
-        }
-
-        .btn:disabled {
-            opacity: 0.7;
-            cursor: wait;
-            transform: none;
-        }
+        .btn-danger:hover { transform: translateY(-1px); }
+        .btn:disabled { opacity: 0.7; cursor: wait; transform: none; }
 
         .feedback {
             min-height: 24px;
@@ -177,97 +145,84 @@
             font-weight: 600;
         }
 
-        .feedback.error {
-            color: var(--danger);
+        .feedback.error { color: var(--danger); }
+        .feedback.success { color: var(--success); }
+
+        .lang-switcher {
+            font-size: 0.85rem;
         }
 
-        .feedback.success {
-            color: var(--success);
+        .lang-switcher a {
+            color: var(--accent-strong);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 8px;
         }
+
+        .lang-switcher a:hover { text-decoration: underline; }
 
         @media (max-width: 640px) {
-            body {
-                padding: 12px;
-            }
-
-            .container {
-                padding: 0;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 16px;
-                align-items: flex-start;
-                padding: 16px;
-            }
-
-            .header-title {
-                font-size: 1.5rem;
-            }
-
-            .header-actions {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            .user-info {
-                padding: 16px;
-            }
-
-            .actions-section {
-                grid-template-columns: 1fr;
-            }
-
-            .action-card {
-                padding: 16px;
-            }
+            body { padding: 12px; }
+            .container { padding: 0; }
+            .header { flex-direction: column; gap: 16px; align-items: flex-start; padding: 16px; }
+            .header-title { font-size: 1.5rem; }
+            .header-actions { width: 100%; flex-direction: column; }
+            .user-info { padding: 16px; }
+            .actions-section { grid-template-columns: 1fr; }
+            .action-card { padding: 16px; }
         }
     </style>
 </head>
 <body>
 <div class="container">
+
     <!-- Header -->
     <div class="header">
-        <h1 class="header-title">My Profile</h1>
+        <h1 class="header-title"><spring:message code="profile.title"/></h1>
         <div class="header-actions">
-            <button class="btn btn-danger" id="logoutBtn" onclick="logout()">Logout</button>
+            <div class="lang-switcher">
+                <a href="?lang=tr">🇹🇷 Türkçe</a>
+                <a href="?lang=en">🇬🇧 English</a>
+            </div>
+            <button class="btn btn-danger" id="logoutBtn" onclick="logout()">
+                <spring:message code="profile.logout"/>
+            </button>
         </div>
     </div>
 
-    <!-- User Information Section -->
+    <!-- Kullanıcı Bilgileri -->
     <div class="user-info">
         <div class="info-group">
-            <label for="fullName">Full Name</label>
+            <label><spring:message code="profile.fullname"/></label>
             <p id="fullName">${user.fullName}</p>
         </div>
-
         <div class="info-group">
-            <label for="email">Email</label>
+            <label><spring:message code="profile.email"/></label>
             <p id="email">${user.email}</p>
         </div>
-
         <% if (session.getAttribute("userRole") != null) { %>
         <div class="info-group">
-            <label for="role">Role</label>
+            <label><spring:message code="profile.role"/></label>
             <p id="role"><%= session.getAttribute("userRole") %></p>
         </div>
         <% } %>
     </div>
 
-    <!-- Action Buttons Section -->
+    <!-- Aksiyon Kartları -->
     <div class="actions-section">
-        <!-- Create Ticket Card -->
         <div class="action-card">
-            <h3>📝 Create Ticket</h3>
-            <p>Report a new issue or submit a complaint to the system.</p>
-            <a href="<%= request.getContextPath() %>/user/tickets/new" class="btn btn-primary">Create Ticket</a>
+            <h3>📝 <spring:message code="profile.create.ticket"/></h3>
+            <p><spring:message code="profile.create.ticket.desc"/></p>
+            <a href="<%= request.getContextPath() %>/user/tickets/new" class="btn btn-primary">
+                <spring:message code="profile.create.ticket"/>
+            </a>
         </div>
-
-        <!-- View Tickets Card -->
         <div class="action-card">
-            <h3>📋 View Tickets</h3>
-            <p>See all your submitted tickets and track their status.</p>
-            <a href="<%= request.getContextPath() %>/user/tickets" class="btn btn-primary">View Tickets</a>
+            <h3>📋 <spring:message code="profile.view.tickets"/></h3>
+            <p><spring:message code="profile.view.tickets.desc"/></p>
+            <a href="<%= request.getContextPath() %>/user/tickets" class="btn btn-primary">
+                <spring:message code="profile.view.tickets"/>
+            </a>
         </div>
     </div>
 
@@ -282,47 +237,40 @@
     }
 
     async function logout() {
-        if (!confirm("Are you sure you want to logout?")) {
-            return;
-        }
+        if (!confirm("<spring:message code='profile.logout.confirm'/>")) return;
 
         const logoutBtn = document.getElementById("logoutBtn");
         logoutBtn.disabled = true;
-        setFeedback("Logging out...", "success");
+        setFeedback("<spring:message code='profile.logout.loading'/>", "success");
 
         try {
             const response = await fetch("<%= request.getContextPath() %>/auth/logout", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                }
+                headers: { "Content-Type": "application/json" }
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                setFeedback(data.error || "Logout failed.", "error");
+                setFeedback(data.error || "<spring:message code='common.error'/>", "error");
                 logoutBtn.disabled = false;
                 return;
             }
 
-            setFeedback(data.message || "Logout successful.", "success");
+            setFeedback(data.message || "<spring:message code='profile.logout.success'/>", "success");
 
-            // Redirect to login page after 1 second
             setTimeout(() => {
                 window.location.href = "<%= request.getContextPath() %>/login";
             }, 1000);
         } catch (error) {
-            setFeedback("The server could not be reached. Please try again later.", "error");
+            setFeedback("<spring:message code='common.error'/>", "error");
             logoutBtn.disabled = false;
         }
     }
 
-    // Verify user is logged in
     window.addEventListener("load", () => {
         const fullName = document.getElementById("fullName").textContent.trim();
         if (!fullName) {
-            // User not logged in, redirect to login
             window.location.href = "<%= request.getContextPath() %>/login";
         }
     });

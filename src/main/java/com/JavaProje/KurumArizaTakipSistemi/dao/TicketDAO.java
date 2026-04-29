@@ -13,10 +13,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Data Access Object for Ticket entity.
- * Handles all database operations related to tickets.
- */
 @Repository
 public class TicketDAO {
 
@@ -29,96 +25,93 @@ public class TicketDAO {
         return sessionFactory.getCurrentSession();
     }
 
-    /**
-     * Save a new ticket to the database.
-     */
     public Ticket save(Ticket ticket) {
         logger.debug("TicketDAO.save() - title={}", ticket.getTitle());
         getSession().persist(ticket);
         return ticket;
     }
 
-    /**
-     * Update an existing ticket.
-     */
     public void update(Ticket ticket) {
         logger.debug("TicketDAO.update() - ticketId={}", ticket.getTicketId());
         getSession().merge(ticket);
     }
 
-    /**
-     * Delete a ticket.
-     */
     public void delete(Ticket ticket) {
         logger.debug("TicketDAO.delete() - ticketId={}", ticket.getTicketId());
         getSession().remove(ticket);
     }
 
-    /**
-     * Find ticket by ID.
-     */
     public Optional<Ticket> findById(Integer id) {
         logger.debug("TicketDAO.findById() - id={}", id);
         return Optional.ofNullable(getSession().get(Ticket.class, id));
     }
 
-    /**
-     * Get all tickets.
-     */
     public List<Ticket> findAll() {
         logger.debug("TicketDAO.findAll()");
         return getSession()
-                .createQuery("FROM Ticket t ORDER BY t.createdAt DESC", Ticket.class)
+                .createQuery("SELECT DISTINCT t FROM Ticket t " +
+                        "LEFT JOIN FETCH t.category " +
+                        "LEFT JOIN FETCH t.status " +
+                        "LEFT JOIN FETCH t.requester " +
+                        "LEFT JOIN FETCH t.assignedTechnician " +
+                        "ORDER BY t.createdAt DESC", Ticket.class)
                 .getResultList();
     }
 
-    /**
-     * Find all tickets created by a specific user (requester).
-     */
     public List<Ticket> findByRequesterId(Long userId) {
         logger.debug("TicketDAO.findByRequesterId() - userId={}", userId);
         return getSession()
-                .createQuery("SELECT DISTINCT t FROM Ticket t LEFT JOIN FETCH t.category LEFT JOIN FETCH t.status WHERE t.requester.userId = :userId ORDER BY t.createdAt DESC", Ticket.class)
+                .createQuery("SELECT DISTINCT t FROM Ticket t " +
+                        "LEFT JOIN FETCH t.category " +
+                        "LEFT JOIN FETCH t.status " +
+                        "LEFT JOIN FETCH t.requester " +
+                        "LEFT JOIN FETCH t.assignedTechnician " +
+                        "WHERE t.requester.userId = :userId " +
+                        "ORDER BY t.createdAt DESC", Ticket.class)
                 .setParameter("userId", userId)
                 .getResultList();
     }
 
-    /**
-     * Find all tickets assigned to a specific technician.
-     */
     public List<Ticket> findByAssignedTechnicianId(Long technicianId) {
         logger.debug("TicketDAO.findByAssignedTechnicianId() - technicianId={}", technicianId);
         return getSession()
-                .createQuery("FROM Ticket t WHERE t.assignedTechnician.userId = :technicianId ORDER BY t.createdAt DESC", Ticket.class)
+                .createQuery("SELECT DISTINCT t FROM Ticket t " +
+                        "LEFT JOIN FETCH t.category " +
+                        "LEFT JOIN FETCH t.status " +
+                        "LEFT JOIN FETCH t.requester " +
+                        "LEFT JOIN FETCH t.assignedTechnician " +
+                        "WHERE t.assignedTechnician.userId = :technicianId " +
+                        "ORDER BY t.createdAt DESC", Ticket.class)
                 .setParameter("technicianId", technicianId)
                 .getResultList();
     }
 
-    /**
-     * Find tickets by status.
-     */
     public List<Ticket> findByStatus(TicketStatus status) {
         logger.debug("TicketDAO.findByStatus() - statusId={}", status.getStatusId());
         return getSession()
-                .createQuery("FROM Ticket t WHERE t.status = :status ORDER BY t.createdAt DESC", Ticket.class)
+                .createQuery("SELECT DISTINCT t FROM Ticket t " +
+                        "LEFT JOIN FETCH t.category " +
+                        "LEFT JOIN FETCH t.status " +
+                        "LEFT JOIN FETCH t.requester " +
+                        "WHERE t.status = :status " +
+                        "ORDER BY t.createdAt DESC", Ticket.class)
                 .setParameter("status", status)
                 .getResultList();
     }
 
-    /**
-     * Find tickets by category.
-     */
     public List<Ticket> findByCategory(TicketCategory category) {
         logger.debug("TicketDAO.findByCategory() - categoryId={}", category.getCategoryId());
         return getSession()
-                .createQuery("FROM Ticket t WHERE t.category = :category ORDER BY t.createdAt DESC", Ticket.class)
+                .createQuery("SELECT DISTINCT t FROM Ticket t " +
+                        "LEFT JOIN FETCH t.category " +
+                        "LEFT JOIN FETCH t.status " +
+                        "LEFT JOIN FETCH t.requester " +
+                        "WHERE t.category = :category " +
+                        "ORDER BY t.createdAt DESC", Ticket.class)
                 .setParameter("category", category)
                 .getResultList();
     }
 
-    /**
-     * Count total tickets.
-     */
     public long countAll() {
         logger.debug("TicketDAO.countAll()");
         Long count = getSession()
@@ -127,9 +120,6 @@ public class TicketDAO {
         return count != null ? count : 0L;
     }
 
-    /**
-     * Count tickets for a specific user.
-     */
     public long countByRequesterId(Long userId) {
         logger.debug("TicketDAO.countByRequesterId() - userId={}", userId);
         Long count = getSession()
@@ -137,5 +127,14 @@ public class TicketDAO {
                 .setParameter("userId", userId)
                 .getSingleResult();
         return count != null ? count : 0L;
+    }
+
+    public int deleteExpiredUnverifiedUsers() {
+        return getSession()
+                .createMutationQuery(
+                        "DELETE FROM Ticket t WHERE t.assignedTechnician IS NULL " +
+                                "AND t.createdAt < :cutoff")
+                .setParameter("cutoff", java.time.LocalDateTime.now().minusDays(30))
+                .executeUpdate();
     }
 }
