@@ -43,7 +43,15 @@ public class TicketDAO {
 
     public Optional<Ticket> findById(Integer id) {
         logger.debug("TicketDAO.findById() - id={}", id);
-        return Optional.ofNullable(getSession().get(Ticket.class, id));
+        return getSession()
+                .createQuery("SELECT DISTINCT t FROM Ticket t " +
+                        "LEFT JOIN FETCH t.category " +
+                        "LEFT JOIN FETCH t.status " +
+                        "LEFT JOIN FETCH t.requester " +
+                        "LEFT JOIN FETCH t.assignedTechnician " +
+                        "WHERE t.ticketId = :id", Ticket.class)
+                .setParameter("id", id)
+                .uniqueResultOptional();
     }
 
     public List<Ticket> findAll() {

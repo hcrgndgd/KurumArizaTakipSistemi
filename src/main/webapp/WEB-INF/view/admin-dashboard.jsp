@@ -100,11 +100,15 @@
         .role-cell { display: flex; gap: 10px; align-items: center; }
         .stack { display: grid; gap: 18px; }
         .role-list { display: grid; gap: 12px; }
+        .wide-panel { margin-bottom: 22px; }
 
         .role-card { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 20px; background: var(--panel-strong); border: 1px solid rgba(212, 192, 161, 0.68); }
 
         .role-name { font-weight: 700; margin-bottom: 4px; }
         .role-meta { color: var(--muted); font-size: 0.92rem; }
+        .ticket-main { font-weight: 700; margin-bottom: 4px; }
+        .ticket-sub { color: var(--muted); font-size: 0.92rem; }
+        .assignment-cell { display: grid; grid-template-columns: minmax(180px, 1fr) auto auto; gap: 10px; align-items: center; min-width: 420px; }
 
         .field-group { display: grid; gap: 12px; }
 
@@ -138,6 +142,7 @@
             .toolbar { width: 100%; justify-content: stretch; }
             .toolbar button { width: 100%; }
             .role-card { align-items: flex-start; flex-direction: column; }
+            .assignment-cell { grid-template-columns: 1fr; min-width: 260px; }
         }
     </style>
 </head>
@@ -177,6 +182,36 @@
                 <span class="value" id="unassignedCount">0</span>
             </div>
         </div>
+    </section>
+
+    <section class="panel wide-panel">
+        <div class="panel-head">
+            <div>
+                <h2><spring:message code="admin.active.tickets"/></h2>
+                <p><spring:message code="admin.active.tickets.desc"/></p>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th><spring:message code="admin.ticket"/></th>
+                    <th><spring:message code="admin.status"/></th>
+                    <th><spring:message code="admin.requester"/></th>
+                    <th><spring:message code="admin.assignee"/></th>
+                </tr>
+                </thead>
+                <tbody id="ticketsTableBody">
+                <tr>
+                    <td colspan="4">
+                        <div class="empty"><spring:message code="admin.loading.tickets"/></div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <p id="ticketsFeedback" class="feedback" aria-live="polite"></p>
     </section>
 
     <section class="content">
@@ -270,12 +305,20 @@
         userDeleted: "<spring:message code='admin.user.deleted'/>",
         roleUpdated: "<spring:message code='admin.role.updated'/>",
         confirmDelete: "<spring:message code='admin.confirm.delete'/>",
-        confirmDeleteRole: "<spring:message code='admin.confirm.delete.role'/>"
+        confirmDeleteRole: "<spring:message code='admin.confirm.delete.role'/>",
+        noTickets: "<spring:message code='admin.no.tickets'/>",
+        assign: "<spring:message code='admin.assign'/>",
+        unassign: "<spring:message code='admin.unassign'/>",
+        unassignedTicket: "<spring:message code='admin.unassigned.ticket'/>",
+        ticketAssigned: "<spring:message code='admin.ticket.assigned'/>",
+        ticketUnassigned: "<spring:message code='admin.ticket.unassigned'/>"
     };
 
     const usersTableBody = document.getElementById("usersTableBody");
+    const ticketsTableBody = document.getElementById("ticketsTableBody");
     const rolesList = document.getElementById("rolesList");
     const usersFeedback = document.getElementById("usersFeedback");
+    const ticketsFeedback = document.getElementById("ticketsFeedback");
     const rolesFeedback = document.getElementById("rolesFeedback");
     const addRoleFeedback = document.getElementById("addRoleFeedback");
     const addRoleForm = document.getElementById("addRoleForm");
@@ -288,6 +331,11 @@
 
     let users = [];
     let roles = [];
+    let tickets = [];
+
+    function getTechnicians() {
+        return users.filter(user => String(user.roleName || "").toUpperCase() === "TECHNICIAN");
+    }
 
     function setFeedback(element, message, type) {
         element.textContent = message || "";
@@ -316,17 +364,26 @@
 
     function updateStats() {
         const verifiedUsers = users.filter(u => u.verified).length;
-        const usersWithoutRole = users.filter(u => !u.roleName).length;
+        const unassignedTickets = tickets.filter(t => !t.assignedUser).length;
         userCount.textContent = String(users.length);
         verifiedCount.textContent = String(verifiedUsers);
         roleCount.textContent = String(roles.length);
-        unassignedCount.textContent = String(usersWithoutRole);
+        unassignedCount.textContent = String(unassignedTickets);
     }
 
     function buildRoleOptions(selectedRoleId) {
         return roles.map(role => {
             const selected = String(role.roleId) === String(selectedRoleId) ? " selected" : "";
             return '<option value="' + role.roleId + '"' + selected + ">" + role.roleName + "</option>";
+        }).join("");
+    }
+
+    function buildUserOptions(selectedUserId) {
+        return getTechnicians().map(user => {
+            const selected = selectedUserId && String(user.userId) === String(selectedUserId) ? " selected" : "";
+            return '<option value="' + user.userId + '"' + selected + ">" +
+                escapeHtml(user.fullName || user.email || "User " + user.userId) +
+                "</option>";
         }).join("");
     }
 
@@ -349,6 +406,38 @@
                 '<td><div class="role-cell"><select class="role-select">' + buildRoleOptions(user.roleId) + '</select>' +
                 '<button class="mini-btn secondary-btn save-role-btn" type="button">' + i18n.save + '</button></div></td>' +
                 '<td><button class="mini-btn danger-btn delete-user-btn" type="button">' + i18n.delete + '</button></td>' +
+                '</tr>';
+        }).join("");
+
+        updateStats();
+    }
+
+    function renderTickets() {
+        if (!tickets.length) {
+            ticketsTableBody.innerHTML = '<tr><td colspan="4"><div class="empty">' + i18n.noTickets + '</div></td></tr>';
+            updateStats();
+            return;
+        }
+
+        ticketsTableBody.innerHTML = tickets.map(ticket => {
+            const assignedUserId = ticket.assignedUser ? ticket.assignedUser.userId : "";
+            const assignedName = ticket.assignedUser
+                ? escapeHtml(ticket.assignedUser.fullName || ticket.assignedUser.email || ("ID " + ticket.assignedUser.userId))
+                : i18n.unassignedTicket;
+            const unassignDisabled = ticket.assignedUser ? "" : " disabled";
+            const assignDisabled = getTechnicians().length ? "" : " disabled";
+
+            return '<tr data-ticket-id="' + ticket.ticketId + '">' +
+                '<td><div class="ticket-main">' + escapeHtml(ticket.title || "Untitled ticket") + '</div>' +
+                '<div class="ticket-sub">ID ' + ticket.ticketId + ' | ' + escapeHtml(ticket.categoryName || "-") + '</div></td>' +
+                '<td><span class="pill success">' + escapeHtml(ticket.statusName || "-") + '</span></td>' +
+                '<td><div class="user-main">' + escapeHtml(ticket.requester ? (ticket.requester.fullName || "-") : "-") + '</div>' +
+                '<div class="user-sub">' + escapeHtml(ticket.requester ? (ticket.requester.email || "-") : "-") + '</div></td>' +
+                '<td><div class="assignment-cell">' +
+                '<select class="ticket-user-select" aria-label="Assignee">' + buildUserOptions(assignedUserId) + '</select>' +
+                '<button class="mini-btn secondary-btn assign-ticket-btn" type="button"' + assignDisabled + '>' + i18n.assign + '</button>' +
+                '<button class="mini-btn danger-btn unassign-ticket-btn" type="button"' + unassignDisabled + '>' + i18n.unassign + '</button>' +
+                '</div><div class="ticket-sub">' + assignedName + '</div></td>' +
                 '</tr>';
         }).join("");
 
@@ -378,9 +467,20 @@
         try {
             users = await request(contextPath + "/admin/users");
             renderUsers();
+            renderTickets();
         } catch (error) {
             usersTableBody.innerHTML = '<tr><td colspan="4"><div class="empty">Failed to load users.</div></td></tr>';
             setFeedback(usersFeedback, error.message, "error");
+        }
+    }
+
+    async function loadActiveTickets() {
+        try {
+            tickets = await request(contextPath + "/admin/tickets/active");
+            renderTickets();
+        } catch (error) {
+            ticketsTableBody.innerHTML = '<tr><td colspan="4"><div class="empty">Failed to load active tickets.</div></td></tr>';
+            setFeedback(ticketsFeedback, error.message, "error");
         }
     }
 
@@ -396,7 +496,7 @@
     }
 
     async function refreshDashboard() {
-        await Promise.all([loadRoles(), loadUsers()]);
+        await Promise.all([loadRoles(), loadUsers(), loadActiveTickets()]);
     }
 
     async function saveUserRole(userId, roleId, button) {
@@ -444,6 +544,32 @@
         }
     }
 
+    async function assignTicket(ticketId, userId, button) {
+        button.disabled = true;
+        try {
+            await request(contextPath + "/admin/tickets/" + ticketId + "/assignee/" + userId, { method: "PUT" });
+            setFeedback(ticketsFeedback, i18n.ticketAssigned, "success");
+            await loadActiveTickets();
+        } catch (error) {
+            setFeedback(ticketsFeedback, error.message, "error");
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    async function unassignTicket(ticketId, button) {
+        button.disabled = true;
+        try {
+            await request(contextPath + "/admin/tickets/" + ticketId + "/assignee", { method: "DELETE" });
+            setFeedback(ticketsFeedback, i18n.ticketUnassigned, "success");
+            await loadActiveTickets();
+        } catch (error) {
+            setFeedback(ticketsFeedback, error.message, "error");
+        } finally {
+            button.disabled = false;
+        }
+    }
+
     function escapeHtml(value) {
         return String(value)
             .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -483,6 +609,21 @@
         const deleteButton = event.target.closest(".delete-user-btn");
         if (deleteButton) {
             deleteUser(deleteButton.closest("tr").getAttribute("data-user-id"), deleteButton);
+        }
+    });
+
+    ticketsTableBody.addEventListener("click", function (event) {
+        const assignButton = event.target.closest(".assign-ticket-btn");
+        if (assignButton) {
+            const row = assignButton.closest("tr");
+            const userSelect = row.querySelector(".ticket-user-select");
+            assignTicket(row.getAttribute("data-ticket-id"), userSelect.value, assignButton);
+            return;
+        }
+
+        const unassignButton = event.target.closest(".unassign-ticket-btn");
+        if (unassignButton) {
+            unassignTicket(unassignButton.closest("tr").getAttribute("data-ticket-id"), unassignButton);
         }
     });
 

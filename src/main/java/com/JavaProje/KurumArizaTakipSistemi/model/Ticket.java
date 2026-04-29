@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Ticket {
+public class  Ticket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

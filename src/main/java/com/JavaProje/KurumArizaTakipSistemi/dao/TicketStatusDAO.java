@@ -1,6 +1,10 @@
 package com.JavaProje.KurumArizaTakipSistemi.dao;
 
 import com.JavaProje.KurumArizaTakipSistemi.model.TicketStatus;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Predicate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -11,9 +15,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Data Access Object for TicketStatus entity.
- */
 @Repository
 public class TicketStatusDAO {
 
@@ -44,21 +45,52 @@ public class TicketStatusDAO {
 
     public Optional<TicketStatus> findById(Integer id) {
         logger.debug("TicketStatusDAO.findById() - id={}", id);
-        return Optional.ofNullable(getSession().get(TicketStatus.class, id));
+
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<TicketStatus> cq = cb.createQuery(TicketStatus.class);
+
+        Root<TicketStatus> root = cq.from(TicketStatus.class);
+
+        Predicate condition = cb.equal(root.get("statusId"), id);
+
+        cq.select(root).where(condition);
+
+        return getSession()
+                .createQuery(cq)
+                .getResultStream()
+                .findFirst();
     }
 
     public List<TicketStatus> findAll() {
         logger.debug("TicketStatusDAO.findAll()");
+
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<TicketStatus> cq = cb.createQuery(TicketStatus.class);
+
+        Root<TicketStatus> root = cq.from(TicketStatus.class);
+
+        cq.select(root)
+                .orderBy(cb.asc(root.get("statusName")));
+
         return getSession()
-                .createQuery("FROM TicketStatus ORDER BY statusName", TicketStatus.class)
+                .createQuery(cq)
                 .getResultList();
     }
 
     public Optional<TicketStatus> findByName(String statusName) {
         logger.debug("TicketStatusDAO.findByName() - statusName={}", statusName);
+
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<TicketStatus> cq = cb.createQuery(TicketStatus.class);
+
+        Root<TicketStatus> root = cq.from(TicketStatus.class);
+
+        Predicate condition = cb.equal(root.get("statusName"), statusName);
+
+        cq.select(root).where(condition);
+
         return getSession()
-                .createQuery("FROM TicketStatus s WHERE s.statusName = :name", TicketStatus.class)
-                .setParameter("name", statusName)
+                .createQuery(cq)
                 .getResultStream()
                 .findFirst();
     }

@@ -25,6 +25,9 @@ import java.util.List;
 public class TicketService {
 
     private static final Logger logger = LoggerFactory.getLogger(TicketService.class);
+    private static final String STATUS_OPEN = "OPEN";
+    private static final String STATUS_ASSIGNED = "FIXING";
+    private static final String STATUS_CLOSED = "CLOSED";
 
     @Autowired
     private TicketDAO ticketDAO;
@@ -67,22 +70,13 @@ public class TicketService {
         TicketCategory category = ticketCategoryDAO.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
 
-        // Get default status (should be "OPEN")
-        TicketStatus status = ticketStatusDAO.findByName("OPEN")
-                .orElseGet(() -> {
-                    logger.warn("OPEN status not found, creating new one");
-                    TicketStatus newStatus = new TicketStatus();
-                    newStatus.setStatusName("OPEN");
-                    return ticketStatusDAO.save(newStatus);
-                });
-
         // Create ticket
         Ticket ticket = new Ticket();
         ticket.setTitle(title);
         ticket.setDescription(description);
         ticket.setRequester(requester);
         ticket.setCategory(category);
-        ticket.setStatus(status);
+        ticket.setStatus(getStatusByName(STATUS_OPEN));
         ticket.setCreatedAt(LocalDateTime.now());
 
         ticketDAO.save(ticket);
@@ -179,6 +173,7 @@ public class TicketService {
                 .orElseThrow(() -> new IllegalArgumentException("Technician not found"));
 
         ticket.setAssignedTechnician(technician);
+        ticket.setStatus(getStatusByName(STATUS_ASSIGNED));
         ticket.setUpdatedAt(LocalDateTime.now());
         ticketDAO.update(ticket);
 
@@ -252,10 +247,25 @@ public class TicketService {
         Ticket ticket = ticketDAO.findById(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
         ticket.setAssignedTechnician(null);
+        ticket.setStatus(getStatusByName(STATUS_OPEN));
         ticket.setUpdatedAt(LocalDateTime.now());
         ticketDAO.update(ticket);
     }
 
+    @Transactional
+    public void closeTicket(Integer ticketId) {
+        logger.info("TicketService.closeTicket() - ticketId={}", ticketId);
+        Ticket ticket = ticketDAO.findById(ticketId)
+                .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
+        ticket.setStatus(getStatusByName(STATUS_CLOSED));
+        ticket.setUpdatedAt(LocalDateTime.now());
+        ticketDAO.update(ticket);
+    }
+
+    private TicketStatus getStatusByName(String statusName) {
+        return ticketStatusDAO.findByName(statusName)
+                .orElseThrow(() -> new IllegalStateException("Missing ticket status: " + statusName));
+    }
 
 
 }

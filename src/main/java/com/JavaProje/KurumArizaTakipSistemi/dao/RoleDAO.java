@@ -1,8 +1,10 @@
 package com.JavaProje.KurumArizaTakipSistemi.dao;
 
-
-
 import com.JavaProje.KurumArizaTakipSistemi.model.Role;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Predicate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +24,35 @@ public class RoleDAO {
     }
 
     public Optional<Role> findByName(String roleName) {
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<Role> cq = cb.createQuery(Role.class);
+
+        Root<Role> root = cq.from(Role.class);
+
+        Predicate condition = cb.equal(root.get("roleName"), roleName);
+
+        cq.select(root).where(condition);
+
         return getSession()
-                .createQuery("FROM Role r WHERE r.roleName = :name", Role.class)
-                .setParameter("name", roleName)
+                .createQuery(cq)
                 .getResultStream()
                 .findFirst();
     }
 
     public Optional<Role> findById(long roleId) {
-        return Optional.ofNullable(getSession().get(Role.class, (int) roleId));
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<Role> cq = cb.createQuery(Role.class);
+
+        Root<Role> root = cq.from(Role.class);
+
+        Predicate condition = cb.equal(root.get("id"), roleId);
+
+        cq.select(root).where(condition);
+
+        return getSession()
+                .createQuery(cq)
+                .getResultStream()
+                .findFirst();
     }
 
     public void save(Role role) {
@@ -42,8 +64,15 @@ public class RoleDAO {
     }
 
     public List<Role> findAll() {
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<Role> cq = cb.createQuery(Role.class);
+
+        Root<Role> root = cq.from(Role.class);
+
+        cq.select(root);
+
         return getSession()
-                .createQuery("FROM Role r", Role.class)
+                .createQuery(cq)
                 .getResultList();
     }
 }

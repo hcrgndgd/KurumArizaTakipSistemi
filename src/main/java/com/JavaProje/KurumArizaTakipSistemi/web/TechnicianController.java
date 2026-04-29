@@ -1,7 +1,6 @@
 package com.JavaProje.KurumArizaTakipSistemi.web;
 
 import com.JavaProje.KurumArizaTakipSistemi.model.Ticket;
-import com.JavaProje.KurumArizaTakipSistemi.model.TicketStatus;
 import com.JavaProje.KurumArizaTakipSistemi.model.User;
 import com.JavaProje.KurumArizaTakipSistemi.service.TicketService;
 import jakarta.servlet.http.HttpSession;
@@ -10,7 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
@@ -33,11 +35,11 @@ public class TechnicianController {
 
     @GetMapping("/tickets")
     public String listAvailableTickets(HttpSession session, Model model) {
-        logger.info("GET /technician/tickets - Bekleyen ticketlar listeleniyor");
+        logger.info("GET /technician/tickets - listing available tickets");
 
         User technician = getAuthenticatedTechnician(session);
         if (technician == null) {
-            logger.warn("GET /technician/tickets - Yetkisiz erişim");
+            logger.warn("GET /technician/tickets - unauthorized access");
             return "redirect:/login";
         }
 
@@ -49,10 +51,10 @@ public class TechnicianController {
 
             model.addAttribute("tickets", availableTickets);
             model.addAttribute("technician", technician);
-            logger.info("GET /technician/tickets - {} atanmamış ticket bulundu", availableTickets.size());
+            logger.info("GET /technician/tickets - {} unassigned tickets found", availableTickets.size());
         } catch (Exception e) {
-            logger.error("GET /technician/tickets - Hata: {}", e.getMessage());
-            model.addAttribute("error", "Ticketlar yüklenirken hata oluştu.");
+            logger.error("GET /technician/tickets - failed", e);
+            model.addAttribute("error", "Ticketlar yuklenirken hata olustu.");
         }
 
         return "technician/tickets";
@@ -60,24 +62,31 @@ public class TechnicianController {
 
     @GetMapping("/my-tickets")
     public String listMyTickets(HttpSession session, Model model) {
-        logger.info("GET /technician/my-tickets - Teknisyene atanmış ticketlar listeleniyor");
+        logger.info("GET /technician/my-tickets - listing assigned tickets");
 
         User technician = getAuthenticatedTechnician(session);
         if (technician == null) {
-            logger.warn("GET /technician/my-tickets - Yetkisiz erişim");
+            logger.warn("GET /technician/my-tickets - unauthorized access");
             return "redirect:/login";
         }
 
         try {
             List<Ticket> myTickets = ticketService.getTicketsByAssignedTechnician(technician.getUserId());
-            model.addAttribute("tickets", myTickets);
+            List<Ticket> activeTickets = myTickets.stream()
+                    .filter(ticket -> !isClosed(ticket))
+                    .toList();
+            List<Ticket> completedTickets = myTickets.stream()
+                    .filter(this::isClosed)
+                    .toList();
+
+            model.addAttribute("tickets", activeTickets);
+            model.addAttribute("completedTickets", completedTickets);
             model.addAttribute("technician", technician);
-            model.addAttribute("statuses", ticketService.getAllStatuses());
-            logger.info("GET /technician/my-tickets - {} ticket bulundu | technician={}",
-                    myTickets.size(), technician.getEmail());
+            logger.info("GET /technician/my-tickets - {} active tickets, {} completed tickets found | technician={}",
+                    activeTickets.size(), completedTickets.size(), technician.getEmail());
         } catch (Exception e) {
-            logger.error("GET /technician/my-tickets - Hata: {}", e.getMessage());
-            model.addAttribute("error", "Ticketlar yüklenirken hata oluştu.");
+            logger.error("GET /technician/my-tickets - failed", e);
+            model.addAttribute("error", "Ticketlar yuklenirken hata olustu.");
         }
 
         return "technician/my-tickets";
@@ -85,11 +94,11 @@ public class TechnicianController {
 
     @PostMapping("/tickets/{id}/assign")
     public String assignTicket(@PathVariable("id") Integer id, HttpSession session) {
-        logger.info("POST /technician/tickets/{}/assign - Ticket alınıyor", id);
+        logger.info("POST /technician/tickets/{}/assign - assigning ticket", id);
 
         User technician = getAuthenticatedTechnician(session);
         if (technician == null) {
-            logger.warn("POST /technician/tickets/{}/assign - Yetkisiz erişim", id);
+            logger.warn("POST /technician/tickets/{}/assign - unauthorized access", id);
             return "redirect:/login";
         }
 
@@ -97,39 +106,29 @@ public class TechnicianController {
             Ticket ticket = ticketService.getTicketById(id);
 
             if (ticket.getAssignedTechnician() != null) {
-                logger.warn("POST /technician/tickets/{}/assign - Ticket zaten atanmış", id);
+                logger.warn("POST /technician/tickets/{}/assign - ticket already assigned", id);
                 return "redirect:/technician/tickets?error=already_assigned";
             }
 
             ticketService.assignTicket(id, technician.getUserId());
-
-            List<TicketStatus> statuses = ticketService.getAllStatuses();
-            statuses.stream()
-                    .filter(s -> s.getStatusName().equals("BAŞLADI"))
-                    .findFirst()
-                    .ifPresent(s -> ticketService.updateTicketStatus(id, s.getStatusId()));
-
-            logger.info("POST /technician/tickets/{}/assign - Ticket alındı | technician={}",
+            logger.info("POST /technician/tickets/{}/assign - ticket assigned | technician={}",
                     id, technician.getEmail());
         } catch (Exception e) {
-            logger.error("POST /technician/tickets/{}/assign - Hata: {}", id, e.getMessage());
+            logger.error("POST /technician/tickets/{}/assign - failed", id, e);
             return "redirect:/technician/tickets?error=true";
         }
 
         return "redirect:/technician/my-tickets";
     }
 
-    @PostMapping("/tickets/{id}/status")
-    public String updateStatus(
-            @PathVariable("id") Integer id,
-            @RequestParam("statusId") Integer statusId,
-            HttpSession session) {
+    @PostMapping("/tickets/{id}/finish")
+    public String finishTicket(@PathVariable("id") Integer id, HttpSession session) {
 
-        logger.info("POST /technician/tickets/{}/status - Durum güncelleniyor | statusId={}", id, statusId);
+        logger.info("POST /technician/tickets/{}/finish - closing ticket", id);
 
         User technician = getAuthenticatedTechnician(session);
         if (technician == null) {
-            logger.warn("POST /technician/tickets/{}/status - Yetkisiz erişim", id);
+            logger.warn("POST /technician/tickets/{}/finish - unauthorized access", id);
             return "redirect:/login";
         }
 
@@ -138,15 +137,19 @@ public class TechnicianController {
 
             if (ticket.getAssignedTechnician() == null ||
                     !ticket.getAssignedTechnician().getUserId().equals(technician.getUserId())) {
-                logger.warn("POST /technician/tickets/{}/status - Bu ticket teknisyene ait değil", id);
+                logger.warn("POST /technician/tickets/{}/finish - ticket does not belong to technician", id);
                 return "redirect:/technician/my-tickets?error=not_yours";
             }
+            if (isClosed(ticket)) {
+                logger.warn("POST /technician/tickets/{}/finish - closed ticket cannot be edited", id);
+                return "redirect:/technician/my-tickets?error=closed";
+            }
 
-            ticketService.updateTicketStatus(id, statusId);
-            logger.info("POST /technician/tickets/{}/status - Durum güncellendi | technician={}",
+            ticketService.closeTicket(id);
+            logger.info("POST /technician/tickets/{}/finish - ticket closed | technician={}",
                     id, technician.getEmail());
         } catch (Exception e) {
-            logger.error("POST /technician/tickets/{}/status - Hata: {}", id, e.getMessage());
+            logger.error("POST /technician/tickets/{}/finish - failed", id, e);
             return "redirect:/technician/my-tickets?error=true";
         }
 
@@ -155,11 +158,11 @@ public class TechnicianController {
 
     @PostMapping("/tickets/{id}/unassign")
     public String unassignTicket(@PathVariable("id") Integer id, HttpSession session) {
-        logger.info("POST /technician/tickets/{}/unassign - Ticket bırakılıyor", id);
+        logger.info("POST /technician/tickets/{}/unassign - unassigning ticket", id);
 
         User technician = getAuthenticatedTechnician(session);
         if (technician == null) {
-            logger.warn("POST /technician/tickets/{}/unassign - Yetkisiz erişim", id);
+            logger.warn("POST /technician/tickets/{}/unassign - unauthorized access", id);
             return "redirect:/login";
         }
 
@@ -168,26 +171,29 @@ public class TechnicianController {
 
             if (ticket.getAssignedTechnician() == null ||
                     !ticket.getAssignedTechnician().getUserId().equals(technician.getUserId())) {
-                logger.warn("POST /technician/tickets/{}/unassign - Bu ticket teknisyene ait değil", id);
+                logger.warn("POST /technician/tickets/{}/unassign - ticket does not belong to technician", id);
                 return "redirect:/technician/my-tickets?error=not_yours";
             }
+            if (isClosed(ticket)) {
+                logger.warn("POST /technician/tickets/{}/unassign - closed ticket cannot be unassigned", id);
+                return "redirect:/technician/my-tickets?error=closed";
+            }
 
-            ticket.setAssignedTechnician(null);
-            ticketService.updateTicket(ticket);
-
-            List<TicketStatus> statuses = ticketService.getAllStatuses();
-            statuses.stream()
-                    .filter(s -> s.getStatusName().equals("BEKLEMEDE"))
-                    .findFirst()
-                    .ifPresent(s -> ticketService.updateTicketStatus(id, s.getStatusId()));
-
-            logger.info("POST /technician/tickets/{}/unassign - Ticket bırakıldı | technician={}",
+            ticketService.unassignTicket(id);
+            logger.info("POST /technician/tickets/{}/unassign - ticket unassigned | technician={}",
                     id, technician.getEmail());
         } catch (Exception e) {
-            logger.error("POST /technician/tickets/{}/unassign - Hata: {}", id, e.getMessage());
+            logger.error("POST /technician/tickets/{}/unassign - failed", id, e);
             return "redirect:/technician/my-tickets?error=true";
         }
 
         return "redirect:/technician/tickets";
+    }
+
+    private boolean isClosed(Ticket ticket) {
+        return ticket != null
+                && ticket.getStatus() != null
+                && ticket.getStatus().getStatusName() != null
+                && "CLOSED".equalsIgnoreCase(ticket.getStatus().getStatusName().trim());
     }
 }

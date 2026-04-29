@@ -2,6 +2,10 @@ package com.JavaProje.KurumArizaTakipSistemi.dao;
 
 import com.JavaProje.KurumArizaTakipSistemi.model.Role;
 import com.JavaProje.KurumArizaTakipSistemi.model.User;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Predicate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -11,8 +15,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
-//TODO: use criteria query instead of sql queries
 
 @Repository
 public class UserDAO {
@@ -43,49 +45,85 @@ public class UserDAO {
 
     public Optional<User> findByEmail(String email) {
         logger.debug("UserDAO.findByEmail() - email={}", email);
+
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<User> cq = cb.createQuery(User.class);
+
+        Root<User> root = cq.from(User.class);
+
+        Predicate condition = cb.equal(root.get("email"), email);
+
+        cq.select(root).where(condition);
+
         return getSession()
-                .createQuery("FROM User u WHERE u.email = :email", User.class)
-                .setParameter("email", email)
+                .createQuery(cq)
                 .getResultStream()
                 .findFirst();
     }
 
-    public Optional<User> findById(long id)
-    {
+    public Optional<User> findById(long id) {
         logger.debug("UserDAO.findById() - id = {}", id);
-
         return Optional.ofNullable(getSession().get(User.class, id));
     }
 
     public List<User> findAll() {
         logger.debug("UserDAO.findAll()");
+
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<User> cq = cb.createQuery(User.class);
+
+        Root<User> root = cq.from(User.class);
+
+        cq.select(root);
+
         return getSession()
-                .createQuery("FROM User u", User.class)
+                .createQuery(cq)
                 .getResultList();
     }
 
     public Optional<User> findByVerificationToken(String token) {
         logger.debug("UserDAO.findByVerificationToken() - token={}", token);
+
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<User> cq = cb.createQuery(User.class);
+
+        Root<User> root = cq.from(User.class);
+
+        Predicate condition = cb.equal(root.get("verificationToken"), token);
+
+        cq.select(root).where(condition);
+
         return getSession()
-                .createQuery("FROM User u WHERE u.verificationToken = :token", User.class)
-                .setParameter("token", token)
+                .createQuery(cq)
                 .getResultStream()
                 .findFirst();
     }
 
     public boolean existsByEmail(String email) {
-        Long count = getSession()
-                .createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class)
-                .setParameter("email", email)
-                .getSingleResult();
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+
+        Root<User> root = cq.from(User.class);
+
+        cq.select(cb.count(root))
+                .where(cb.equal(root.get("email"), email));
+
+        Long count = getSession().createQuery(cq).getSingleResult();
+
         return count != null && count > 0;
     }
 
     public long countByRole(Role role) {
-        Long count = getSession()
-                .createQuery("SELECT COUNT(u) FROM User u WHERE u.role = :role", Long.class)
-                .setParameter("role", role)
-                .getSingleResult();
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+
+        Root<User> root = cq.from(User.class);
+
+        cq.select(cb.count(root))
+                .where(cb.equal(root.get("role"), role));
+
+        Long count = getSession().createQuery(cq).getSingleResult();
+
         return count != null ? count : 0L;
     }
 }

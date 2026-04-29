@@ -1,6 +1,10 @@
 package com.JavaProje.KurumArizaTakipSistemi.dao;
 
 import com.JavaProje.KurumArizaTakipSistemi.model.TicketCategory;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Predicate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -11,9 +15,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Data Access Object for TicketCategory entity.
- */
 @Repository
 public class TicketCategoryDAO {
 
@@ -44,21 +45,52 @@ public class TicketCategoryDAO {
 
     public Optional<TicketCategory> findById(Integer id) {
         logger.debug("TicketCategoryDAO.findById() - id={}", id);
-        return Optional.ofNullable(getSession().get(TicketCategory.class, id));
+
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<TicketCategory> cq = cb.createQuery(TicketCategory.class);
+
+        Root<TicketCategory> root = cq.from(TicketCategory.class);
+
+        Predicate condition = cb.equal(root.get("categoryId"), id);
+
+        cq.select(root).where(condition);
+
+        return getSession()
+                .createQuery(cq)
+                .getResultStream()
+                .findFirst();
     }
 
     public List<TicketCategory> findAll() {
         logger.debug("TicketCategoryDAO.findAll()");
+
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<TicketCategory> cq = cb.createQuery(TicketCategory.class);
+
+        Root<TicketCategory> root = cq.from(TicketCategory.class);
+
+        cq.select(root)
+                .orderBy(cb.asc(root.get("categoryName")));
+
         return getSession()
-                .createQuery("FROM TicketCategory ORDER BY categoryName", TicketCategory.class)
+                .createQuery(cq)
                 .getResultList();
     }
 
     public Optional<TicketCategory> findByName(String categoryName) {
         logger.debug("TicketCategoryDAO.findByName() - categoryName={}", categoryName);
+
+        CriteriaBuilder cb = getSession().getCriteriaBuilder();
+        CriteriaQuery<TicketCategory> cq = cb.createQuery(TicketCategory.class);
+
+        Root<TicketCategory> root = cq.from(TicketCategory.class);
+
+        Predicate condition = cb.equal(root.get("categoryName"), categoryName);
+
+        cq.select(root).where(condition);
+
         return getSession()
-                .createQuery("FROM TicketCategory c WHERE c.categoryName = :name", TicketCategory.class)
-                .setParameter("name", categoryName)
+                .createQuery(cq)
                 .getResultStream()
                 .findFirst();
     }

@@ -194,6 +194,9 @@
   <c:if test="${param.error == 'not_yours'}">
     <div class="error-msg">⚠️ <spring:message code="technician.error.not_yours"/></div>
   </c:if>
+  <c:if test="${param.error == 'closed'}">
+    <div class="error-msg">âš ï¸ <spring:message code="technician.error.closed"/></div>
+  </c:if>
   <c:if test="${param.error == 'true'}">
     <div class="error-msg">⚠️ <spring:message code="common.error"/></div>
   </c:if>
@@ -235,20 +238,12 @@
               <td>${ticket.createdAt}</td>
               <td>
                 <div class="actions-row">
-                  <!-- Durum güncelle -->
+                  <!-- Finish -->
                   <form method="post"
-                        action="${pageContext.request.contextPath}/technician/tickets/${ticket.ticketId}/status"
-                        style="display:flex; gap:6px; align-items:center;">
-                    <select name="statusId">
-                      <c:forEach var="status" items="${statuses}">
-                        <option value="${status.statusId}"
-                                <c:if test="${status.statusId == ticket.status.statusId}">selected</c:if>>
-                            ${status.statusName}
-                        </option>
-                      </c:forEach>
-                    </select>
+                        action="${pageContext.request.contextPath}/technician/tickets/${ticket.ticketId}/finish"
+                        onsubmit="return confirm('<spring:message code="technician.finish.confirm"/>')">
                     <button type="submit" class="btn btn-success">
-                      <spring:message code="technician.update"/>
+                      <spring:message code="technician.finish"/>
                     </button>
                   </form>
 
@@ -262,6 +257,44 @@
                   </form>
                 </div>
               </td>
+            </tr>
+          </c:forEach>
+          </tbody>
+        </table>
+      </c:otherwise>
+    </c:choose>
+  </div>
+
+  <!-- Completed tickets -->
+  <div class="ticket-table-wrapper">
+    <div class="ticket-table-header">✓ <spring:message code="technician.completed.tickets.header"/></div>
+    <c:choose>
+      <c:when test="${empty completedTickets}">
+        <div class="empty-msg">
+          <spring:message code="technician.no.completed.tickets"/>
+        </div>
+      </c:when>
+      <c:otherwise>
+        <table>
+          <thead>
+          <tr>
+            <th><spring:message code="ticket.id"/></th>
+            <th><spring:message code="ticket.title"/></th>
+            <th><spring:message code="ticket.category"/></th>
+            <th><spring:message code="ticket.status"/></th>
+            <th><spring:message code="ticket.date"/></th>
+          </tr>
+          </thead>
+          <tbody>
+          <c:forEach var="ticket" items="${completedTickets}">
+            <tr>
+              <td>${ticket.ticketId}</td>
+              <td>${ticket.title}</td>
+              <td>${ticket.category.categoryName}</td>
+              <td>
+                <span class="badge badge-done">${ticket.status.statusName}</span>
+              </td>
+              <td>${ticket.createdAt}</td>
             </tr>
           </c:forEach>
           </tbody>

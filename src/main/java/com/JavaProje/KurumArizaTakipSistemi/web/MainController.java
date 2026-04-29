@@ -27,4 +27,15 @@ public class MainController {
     public String adminDashboard() {
         return "admin-dashboard";
     }
+
+    @GetMapping("/404")
+    public String error404() {
+        return "errors/404";
+    }
+
+    @GetMapping("/500")
+    public String error505()
+    {
+        return "errors/500";
+    }
 }

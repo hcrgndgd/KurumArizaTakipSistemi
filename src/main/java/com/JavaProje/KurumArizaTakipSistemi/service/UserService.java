@@ -150,6 +150,13 @@ public class UserService {
         return userDAO.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public User getUserById(long userId) {
+        logger.info("UserService.getUserById() - userId={}", userId);
+        return userDAO.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("This user doesn't exist"));
+    }
+
     @Transactional
     public boolean setRole(long userId, long roleId)
     {
