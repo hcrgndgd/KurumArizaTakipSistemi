@@ -28,6 +28,7 @@ public class TicketService {
     private static final String STATUS_OPEN = "OPEN";
     private static final String STATUS_ASSIGNED = "FIXING";
     private static final String STATUS_CLOSED = "CLOSED";
+    private static final List<String> DEFAULT_STATUS_NAMES = List.of(STATUS_OPEN, STATUS_ASSIGNED, STATUS_CLOSED);
 
     @Autowired
     private TicketDAO ticketDAO;
@@ -225,6 +226,33 @@ public class TicketService {
     public List<TicketStatus> getAllStatuses() {
         logger.info("TicketService.getAllStatuses()");
         return ticketStatusDAO.findAll();
+    }
+
+    @Transactional
+    public void ensureDefaultTicketStatuses() {
+        logger.info("REFERENCE_DATA_SEED | class=TicketService | method=ensureDefaultTicketStatuses | target=ticket_Statuses | required={}", DEFAULT_STATUS_NAMES);
+
+        List<TicketStatus> existingStatuses = ticketStatusDAO.findAll();
+        for (String statusName : DEFAULT_STATUS_NAMES) {
+            TicketStatus existingStatus = existingStatuses.stream()
+                    .filter(status -> status.getStatusName() != null && statusName.equalsIgnoreCase(status.getStatusName().trim()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingStatus == null) {
+                TicketStatus status = new TicketStatus();
+                status.setStatusName(statusName);
+                ticketStatusDAO.save(status);
+                logger.info("REFERENCE_DATA_CREATED | class=TicketService | method=ensureDefaultTicketStatuses | status={}", statusName);
+            } else if (!statusName.equals(existingStatus.getStatusName())) {
+                String previousStatusName = existingStatus.getStatusName();
+                existingStatus.setStatusName(statusName);
+                ticketStatusDAO.update(existingStatus);
+                logger.info("REFERENCE_DATA_NORMALIZED | class=TicketService | method=ensureDefaultTicketStatuses | previousStatus={} | normalizedStatus={}", previousStatusName, statusName);
+            } else {
+                logger.debug("REFERENCE_DATA_EXISTS | class=TicketService | method=ensureDefaultTicketStatuses | status={}", statusName);
+            }
+        }
     }
 
     /**

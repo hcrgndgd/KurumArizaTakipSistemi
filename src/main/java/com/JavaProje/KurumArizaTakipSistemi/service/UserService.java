@@ -20,6 +20,7 @@ import java.util.UUID;
 public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private static final List<String> DEFAULT_ROLE_NAMES = List.of("USER", "ADMIN", "TECHNICIAN");
 
     @Autowired
     private UserDAO userDAO;
@@ -231,6 +232,33 @@ public class UserService {
     public List<Role> loadAllRoles() {
         logger.info("UserService.loadAllRoles()");
         return roleDAO.findAll();
+    }
+
+    @Transactional
+    public void ensureDefaultRoles() {
+        logger.info("REFERENCE_DATA_SEED | class=UserService | method=ensureDefaultRoles | target=roles | required={}", DEFAULT_ROLE_NAMES);
+
+        List<Role> existingRoles = roleDAO.findAll();
+        for (String roleName : DEFAULT_ROLE_NAMES) {
+            Role existingRole = existingRoles.stream()
+                    .filter(role -> role.getRoleName() != null && roleName.equalsIgnoreCase(role.getRoleName().trim()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingRole == null) {
+                Role role = new Role();
+                role.setRoleName(roleName);
+                roleDAO.save(role);
+                logger.info("REFERENCE_DATA_CREATED | class=UserService | method=ensureDefaultRoles | role={}", roleName);
+            } else if (!roleName.equals(existingRole.getRoleName())) {
+                String previousRoleName = existingRole.getRoleName();
+                existingRole.setRoleName(roleName);
+                roleDAO.update(existingRole);
+                logger.info("REFERENCE_DATA_NORMALIZED | class=UserService | method=ensureDefaultRoles | previousRole={} | normalizedRole={}", previousRoleName, roleName);
+            } else {
+                logger.debug("REFERENCE_DATA_EXISTS | class=UserService | method=ensureDefaultRoles | role={}", roleName);
+            }
+        }
     }
 
     @Transactional

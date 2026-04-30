@@ -14,15 +14,33 @@ public class StartupSeeder {
 
     private final CategoryCatalogService categoryCatalogService;
     private final UserService userService;
+    private final TicketService ticketService;
 
     @Autowired
-    public StartupSeeder(CategoryCatalogService categoryCatalogService, UserService userService) {
+    public StartupSeeder(CategoryCatalogService categoryCatalogService, UserService userService, TicketService ticketService) {
         this.categoryCatalogService = categoryCatalogService;
         this.userService = userService;
+        this.ticketService = ticketService;
     }
 
     @EventListener
     public void onContextRefreshed(ContextRefreshedEvent event) {
+        try {
+            logger.info("STARTUP_SEED | class=StartupSeeder | method=onContextRefreshed | step=defaultRoles");
+            userService.ensureDefaultRoles();
+            logger.info("STARTUP_SEED_SUCCESS | class=StartupSeeder | method=onContextRefreshed | step=defaultRoles");
+        } catch (Exception e) {
+            logger.error("STARTUP_SEED_FAILED | class=StartupSeeder | method=onContextRefreshed | step=defaultRoles", e);
+        }
+
+        try {
+            logger.info("STARTUP_SEED | class=StartupSeeder | method=onContextRefreshed | step=defaultTicketStatuses");
+            ticketService.ensureDefaultTicketStatuses();
+            logger.info("STARTUP_SEED_SUCCESS | class=StartupSeeder | method=onContextRefreshed | step=defaultTicketStatuses");
+        } catch (Exception e) {
+            logger.error("STARTUP_SEED_FAILED | class=StartupSeeder | method=onContextRefreshed | step=defaultTicketStatuses", e);
+        }
+
         try {
             logger.info("Running CategoryCatalogService.ensureDefaultsAndList() to seed default categories");
             categoryCatalogService.ensureDefaultsAndList();

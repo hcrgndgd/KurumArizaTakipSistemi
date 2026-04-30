@@ -45,7 +45,7 @@ public class RoleDAO {
 
         Root<Role> root = cq.from(Role.class);
 
-        Predicate condition = cb.equal(root.get("id"), roleId);
+        Predicate condition = cb.equal(root.get("roleId"), roleId);
 
         cq.select(root).where(condition);
 
@@ -57,6 +57,10 @@ public class RoleDAO {
 
     public void save(Role role) {
         getSession().persist(role);
+    }
+
+    public void update(Role role) {
+        getSession().merge(role);
     }
 
     public void delete(Role role) {
