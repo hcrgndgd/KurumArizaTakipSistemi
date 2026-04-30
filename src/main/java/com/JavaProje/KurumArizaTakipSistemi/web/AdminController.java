@@ -33,22 +33,32 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<List<Map<String, Object>>> loadUsers()
     {
-        List<Map<String, Object>> users = userService.loadAllUsers().stream()
-                .map(this::toUserResponse)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(users);
+        logger.info("API_REQUEST | class=AdminController | method=loadUsers | endpoint=GET /admin/users");
+        try {
+            List<Map<String, Object>> users = userService.loadAllUsers().stream()
+                    .map(this::toUserResponse)
+                    .collect(Collectors.toList());
+            logger.info("API_SUCCESS | class=AdminController | method=loadUsers | endpoint=GET /admin/users | userCount={}", users.size());
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            logger.error("API_ERROR | class=AdminController | method=loadUsers | endpoint=GET /admin/users", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @DeleteMapping("/users/{id}")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable("id") long id)
     {
+        logger.info("API_REQUEST | class=AdminController | method=deleteUser | endpoint=DELETE /admin/users/{} | userId={}", id, id);
         try {
             userService.deleteUser(id);
+            logger.info("API_SUCCESS | class=AdminController | method=deleteUser | endpoint=DELETE /admin/users/{} | userId={}", id, id);
             return ResponseEntity.ok(Map.of("message", "User deleted successfully."));
         } catch (IllegalArgumentException e) {
+            logger.warn("API_VALIDATION_FAILED | class=AdminController | method=deleteUser | endpoint=DELETE /admin/users/{} | userId={} | reason={}", id, id, e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            logger.error("DELETE /admin/users/{} failed", id, e);
+            logger.error("API_ERROR | class=AdminController | method=deleteUser | endpoint=DELETE /admin/users/{} | userId={}", id, id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getClass().getSimpleName() + ": " + e.getMessage()));
         }
@@ -56,20 +66,29 @@ public class AdminController {
 
     @GetMapping("/tickets/active")
     public ResponseEntity<List<Map<String, Object>>> loadActiveTickets() {
-        List<Map<String, Object>> tickets = ticketService.getAllTickets().stream()
-                .filter(this::isActiveTicket)
-                .map(this::toTicketResponse)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(tickets);
+        logger.info("API_REQUEST | class=AdminController | method=loadActiveTickets | endpoint=GET /admin/tickets/active");
+        try {
+            List<Map<String, Object>> tickets = ticketService.getAllTickets().stream()
+                    .filter(this::isActiveTicket)
+                    .map(this::toTicketResponse)
+                    .collect(Collectors.toList());
+            logger.info("API_SUCCESS | class=AdminController | method=loadActiveTickets | endpoint=GET /admin/tickets/active | ticketCount={}", tickets.size());
+            return ResponseEntity.ok(tickets);
+        } catch (Exception e) {
+            logger.error("API_ERROR | class=AdminController | method=loadActiveTickets | endpoint=GET /admin/tickets/active", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/tickets/{ticketId}/assignee/{userId}")
     public ResponseEntity<Map<String, String>> assignTicket(
             @PathVariable("ticketId") Integer ticketId,
             @PathVariable("userId") long userId) {
+        logger.info("API_REQUEST | class=AdminController | method=assignTicket | endpoint=PUT /admin/tickets/{}/assignee/{} | ticketId={} | userId={}", ticketId, userId, ticketId, userId);
         try {
             Ticket ticket = getTicketFromAllTickets(ticketId);
             if (!isActiveTicket(ticket)) {
+                logger.warn("API_VALIDATION_FAILED | class=AdminController | method=assignTicket | endpoint=PUT /admin/tickets/{}/assignee/{} | ticketId={} | userId={} | reason=Only active tickets can be assigned", ticketId, userId, ticketId, userId);
                 return ResponseEntity.badRequest().body(Map.of("error", "Only active tickets can be assigned."));
             }
 
@@ -78,11 +97,13 @@ public class AdminController {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Only technicians can be assigned to tickets."));
             ticketService.assignTicket(ticketId, assignee.getUserId());
+            logger.info("API_SUCCESS | class=AdminController | method=assignTicket | endpoint=PUT /admin/tickets/{}/assignee/{} | ticketId={} | userId={}", ticketId, userId, ticketId, userId);
             return ResponseEntity.ok(Map.of("message", "Ticket assigned successfully."));
         } catch (IllegalArgumentException e) {
+            logger.warn("API_VALIDATION_FAILED | class=AdminController | method=assignTicket | endpoint=PUT /admin/tickets/{}/assignee/{} | ticketId={} | userId={} | reason={}", ticketId, userId, ticketId, userId, e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            logger.error("PUT /admin/tickets/{}/assignee/{} failed", ticketId, userId, e);
+            logger.error("API_ERROR | class=AdminController | method=assignTicket | endpoint=PUT /admin/tickets/{}/assignee/{} | ticketId={} | userId={}", ticketId, userId, ticketId, userId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getClass().getSimpleName() + ": " + e.getMessage()));
         }
@@ -90,18 +111,22 @@ public class AdminController {
 
     @DeleteMapping("/tickets/{ticketId}/assignee")
     public ResponseEntity<Map<String, String>> unassignTicket(@PathVariable("ticketId") Integer ticketId) {
+        logger.info("API_REQUEST | class=AdminController | method=unassignTicket | endpoint=DELETE /admin/tickets/{}/assignee | ticketId={}", ticketId, ticketId);
         try {
             Ticket ticket = getTicketFromAllTickets(ticketId);
             if (!isActiveTicket(ticket)) {
+                logger.warn("API_VALIDATION_FAILED | class=AdminController | method=unassignTicket | endpoint=DELETE /admin/tickets/{}/assignee | ticketId={} | reason=Only active tickets can be unassigned", ticketId, ticketId);
                 return ResponseEntity.badRequest().body(Map.of("error", "Only active tickets can be unassigned."));
             }
 
             ticketService.unassignTicket(ticketId);
+            logger.info("API_SUCCESS | class=AdminController | method=unassignTicket | endpoint=DELETE /admin/tickets/{}/assignee | ticketId={}", ticketId, ticketId);
             return ResponseEntity.ok(Map.of("message", "Ticket unassigned successfully."));
         } catch (IllegalArgumentException e) {
+            logger.warn("API_VALIDATION_FAILED | class=AdminController | method=unassignTicket | endpoint=DELETE /admin/tickets/{}/assignee | ticketId={} | reason={}", ticketId, ticketId, e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            logger.error("DELETE /admin/tickets/{}/assignee failed", ticketId, e);
+            logger.error("API_ERROR | class=AdminController | method=unassignTicket | endpoint=DELETE /admin/tickets/{}/assignee | ticketId={}", ticketId, ticketId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getClass().getSimpleName() + ": " + e.getMessage()));
         }
@@ -110,13 +135,16 @@ public class AdminController {
     @PutMapping("/users/{userId}/role/{roleId}")
     public ResponseEntity<Map<String, String>> setRole(@PathVariable("userId") long userId, @PathVariable("roleId") long roleId)
     {
+        logger.info("API_REQUEST | class=AdminController | method=setRole | endpoint=PUT /admin/users/{}/role/{} | userId={} | roleId={}", userId, roleId, userId, roleId);
         try {
             userService.setRole(userId, roleId);
+            logger.info("API_SUCCESS | class=AdminController | method=setRole | endpoint=PUT /admin/users/{}/role/{} | userId={} | roleId={}", userId, roleId, userId, roleId);
             return ResponseEntity.ok(Map.of("message", "Role updated successfully."));
         } catch (IllegalArgumentException e) {
+            logger.warn("API_VALIDATION_FAILED | class=AdminController | method=setRole | endpoint=PUT /admin/users/{}/role/{} | userId={} | roleId={} | reason={}", userId, roleId, userId, roleId, e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            logger.error("PUT /admin/users/{}/role/{} failed", userId, roleId, e);
+            logger.error("API_ERROR | class=AdminController | method=setRole | endpoint=PUT /admin/users/{}/role/{} | userId={} | roleId={}", userId, roleId, userId, roleId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getClass().getSimpleName() + ": " + e.getMessage()));
         }
@@ -125,35 +153,58 @@ public class AdminController {
     @PostMapping("/roles")
     public ResponseEntity<Map<String, String>> addRoles(@RequestBody Map<String, String> body)
     {
+        String roleName = body != null ? body.get("role") : null;
+        logger.info("API_REQUEST | class=AdminController | method=addRoles | endpoint=POST /admin/roles | role={}", roleName);
         try {
-            userService.addRole(body.get("role"));
+            userService.addRole(roleName);
+            logger.info("API_SUCCESS | class=AdminController | method=addRoles | endpoint=POST /admin/roles | role={}", roleName);
             return ResponseEntity.ok(Map.of("message", "Role added successfully."));
         } catch (IllegalArgumentException e) {
+            logger.warn("API_VALIDATION_FAILED | class=AdminController | method=addRoles | endpoint=POST /admin/roles | role={} | reason={}", roleName, e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("API_ERROR | class=AdminController | method=addRoles | endpoint=POST /admin/roles | role={}", roleName, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getClass().getSimpleName() + ": " + e.getMessage()));
         }
     }
 
     @DeleteMapping("/roles")
     public ResponseEntity<Map<String, String>> deleteRoles(@RequestBody Role role)
     {
+        String roleName = role != null ? role.getRoleName() : null;
+        logger.info("API_REQUEST | class=AdminController | method=deleteRoles | endpoint=DELETE /admin/roles | role={}", roleName);
         try {
-            userService.deleteRole(role != null ? role.getRoleName() : null);
+            userService.deleteRole(roleName);
+            logger.info("API_SUCCESS | class=AdminController | method=deleteRoles | endpoint=DELETE /admin/roles | role={}", roleName);
             return ResponseEntity.ok(Map.of("message", "Role deleted successfully."));
         } catch (IllegalArgumentException e) {
+            logger.warn("API_VALIDATION_FAILED | class=AdminController | method=deleteRoles | endpoint=DELETE /admin/roles | role={} | reason={}", roleName, e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("API_ERROR | class=AdminController | method=deleteRoles | endpoint=DELETE /admin/roles | role={}", roleName, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getClass().getSimpleName() + ": " + e.getMessage()));
         }
     }
 
     @GetMapping("/roles")
     public ResponseEntity<List<Map<String, Object>>> loadRoles() {
-        Map<String, Long> userCountsByRole = userService.loadAllUsers().stream()
-                .filter(user -> user.getRole() != null && user.getRole().getRoleName() != null)
-                .collect(Collectors.groupingBy(user -> user.getRole().getRoleName(), Collectors.counting()));
+        logger.info("API_REQUEST | class=AdminController | method=loadRoles | endpoint=GET /admin/roles");
+        try {
+            Map<String, Long> userCountsByRole = userService.loadAllUsers().stream()
+                    .filter(user -> user.getRole() != null && user.getRole().getRoleName() != null)
+                    .collect(Collectors.groupingBy(user -> user.getRole().getRoleName(), Collectors.counting()));
 
-        List<Map<String, Object>> roles = userService.loadAllRoles().stream()
-                .map(role -> toRoleResponse(role, userCountsByRole.getOrDefault(role.getRoleName(), 0L)))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(roles);
+            List<Map<String, Object>> roles = userService.loadAllRoles().stream()
+                    .map(role -> toRoleResponse(role, userCountsByRole.getOrDefault(role.getRoleName(), 0L)))
+                    .collect(Collectors.toList());
+            logger.info("API_SUCCESS | class=AdminController | method=loadRoles | endpoint=GET /admin/roles | roleCount={}", roles.size());
+            return ResponseEntity.ok(roles);
+        } catch (Exception e) {
+            logger.error("API_ERROR | class=AdminController | method=loadRoles | endpoint=GET /admin/roles", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     private Map<String, Object> toUserResponse(User user) {

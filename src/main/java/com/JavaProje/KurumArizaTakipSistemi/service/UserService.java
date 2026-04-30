@@ -8,6 +8,7 @@ import com.JavaProje.KurumArizaTakipSistemi.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,9 @@ public class UserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private Environment env;
 
     private String hashPassword(String password) {
         return org.springframework.util.DigestUtils.md5DigestAsHex(password.getBytes());
@@ -227,5 +231,45 @@ public class UserService {
     public List<Role> loadAllRoles() {
         logger.info("UserService.loadAllRoles()");
         return roleDAO.findAll();
+    }
+
+    @Transactional
+    public void ensureDefaultAdminUser() {
+        boolean bootstrapEnabled = Boolean.parseBoolean(env.getProperty("admin.bootstrap.enabled", "true"));
+        if (!bootstrapEnabled) {
+            logger.info("Default admin bootstrap is disabled");
+            return;
+        }
+
+        String email = env.getProperty("admin.email");
+        String password = env.getProperty("admin.password");
+        String fullName = env.getProperty("admin.full-name", "System Admin");
+
+        if (email == null || email.isBlank() || password == null || password.isBlank()) {
+            logger.warn("Default admin bootstrap skipped because admin.email or admin.password is missing");
+            return;
+        }
+
+        if (userDAO.existsByEmail(email)) {
+            logger.info("Default admin bootstrap skipped because user already exists | email={}", email);
+            return;
+        }
+
+        Role adminRole = roleDAO.findByName("ADMIN").orElseGet(() -> {
+            Role role = new Role();
+            role.setRoleName("ADMIN");
+            roleDAO.save(role);
+            return role;
+        });
+
+        User admin = new User();
+        admin.setFullName(fullName);
+        admin.setEmail(email);
+        admin.setPasswordHash(hashPassword(password));
+        admin.setVerified(true);
+        admin.setRole(adminRole);
+
+        userDAO.save(admin);
+        logger.warn("Default admin user created. Change the bootstrap password after first login | email={}", email);
     }
 }

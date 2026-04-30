@@ -1,5 +1,9 @@
 package com.JavaProje.KurumArizaTakipSistemi.config;
 
+import com.JavaProje.KurumArizaTakipSistemi.interceptor.AdminInterceptor;
+import com.JavaProje.KurumArizaTakipSistemi.interceptor.AuthInterceptor;
+import com.JavaProje.KurumArizaTakipSistemi.interceptor.RequestLoggingInterceptor;
+import com.JavaProje.KurumArizaTakipSistemi.interceptor.TechnicianInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -43,8 +47,33 @@ public class WebConfig implements WebMvcConfigurer {
         return interceptor;
     }
 
+    @Bean
+    public AdminInterceptor adminInterceptor() {
+        return new AdminInterceptor();
+    }
+
+    @Bean
+    public AuthInterceptor authInterceptor() {
+        return new AuthInterceptor();
+    }
+
+    @Bean
+    public TechnicianInterceptor technicianInterceptor() {
+        return new TechnicianInterceptor();
+    }
+
+    @Bean
+    public RequestLoggingInterceptor requestLoggingInterceptor() {
+        return new RequestLoggingInterceptor();
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+
+        registry.addInterceptor(requestLoggingInterceptor()).addPathPatterns("/**");
         registry.addInterceptor(localeChangeInterceptor());
+        registry.addInterceptor(authInterceptor()).addPathPatterns("/user/**");
+        registry.addInterceptor(adminInterceptor()).addPathPatterns("/admin/**");
+        registry.addInterceptor(technicianInterceptor()).addPathPatterns("/technician/**");
     }
 }

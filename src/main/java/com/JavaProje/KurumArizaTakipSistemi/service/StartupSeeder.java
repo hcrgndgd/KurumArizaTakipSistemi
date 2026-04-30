@@ -13,10 +13,12 @@ public class StartupSeeder {
     private static final Logger logger = LoggerFactory.getLogger(StartupSeeder.class);
 
     private final CategoryCatalogService categoryCatalogService;
+    private final UserService userService;
 
     @Autowired
-    public StartupSeeder(CategoryCatalogService categoryCatalogService) {
+    public StartupSeeder(CategoryCatalogService categoryCatalogService, UserService userService) {
         this.categoryCatalogService = categoryCatalogService;
+        this.userService = userService;
     }
 
     @EventListener
@@ -27,6 +29,14 @@ public class StartupSeeder {
             logger.info("Category seeding complete");
         } catch (Exception e) {
             logger.warn("Failed to seed categories on startup", e);
+        }
+
+        try {
+            logger.info("Running UserService.ensureDefaultAdminUser() to seed default admin");
+            userService.ensureDefaultAdminUser();
+            logger.info("Default admin bootstrap complete");
+        } catch (Exception e) {
+            logger.warn("Failed to bootstrap default admin user", e);
         }
     }
 }
