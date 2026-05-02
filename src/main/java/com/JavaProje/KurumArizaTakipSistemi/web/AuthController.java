@@ -63,6 +63,7 @@ public class AuthController {
             Model model) {
 
         logger.info("POST /auth/login - Giriş isteği | email={}", email);
+        logger.error("TEST ERROR LOG");
 
         try {
             User user = userService.login(email, password);
