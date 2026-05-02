@@ -1,9 +1,6 @@
 package com.JavaProje.KurumArizaTakipSistemi.config;
 
-import com.JavaProje.KurumArizaTakipSistemi.interceptor.AdminInterceptor;
-import com.JavaProje.KurumArizaTakipSistemi.interceptor.AuthInterceptor;
-import com.JavaProje.KurumArizaTakipSistemi.interceptor.RequestLoggingInterceptor;
-import com.JavaProje.KurumArizaTakipSistemi.interceptor.TechnicianInterceptor;
+import com.JavaProje.KurumArizaTakipSistemi.interceptor.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -67,6 +64,11 @@ public class WebConfig implements WebMvcConfigurer {
         return new RequestLoggingInterceptor();
     }
 
+    @Bean
+    public NoCacheInterceptor noCacheInterceptor() {
+        return new NoCacheInterceptor();
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
@@ -75,5 +77,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(authInterceptor()).addPathPatterns("/user/**");
         registry.addInterceptor(adminInterceptor()).addPathPatterns("/admin/**");
         registry.addInterceptor(technicianInterceptor()).addPathPatterns("/technician/**");
+        registry.addInterceptor(noCacheInterceptor()).addPathPatterns("/admin/**", "/user/**", "/technician/**");
     }
 }

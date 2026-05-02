@@ -48,3 +48,4 @@ logs/
 hibernate.properties
 ai.properties
 src/main/resources/ai.properties
+src/test/resources/hibernate-test.properties

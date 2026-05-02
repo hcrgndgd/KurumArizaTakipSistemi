@@ -36,16 +36,4 @@ public class MainController {
         return "admin-dashboard";
     }
 
-    @GetMapping("/404")
-    public String error404() {
-        logger.warn("ERROR_PAGE_REQUEST | class=MainController | method=error404 | endpoint=GET /404 | view=errors/404");
-        return "errors/404";
-    }
-
-    @GetMapping("/500")
-    public String error505()
-    {
-        logger.error("ERROR_PAGE_REQUEST | class=MainController | method=error505 | endpoint=GET /500 | view=errors/500");
-        return "errors/500";
-    }
 }

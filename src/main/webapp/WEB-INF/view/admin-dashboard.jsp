@@ -151,9 +151,16 @@
 
     <section class="hero">
         <h1><spring:message code="admin.title"/></h1>
-        <div class="lang-switcher">
-            <a href="?lang=tr">🇹🇷 Türkçe</a>
-            <a href="?lang=en">🇬🇧 English</a>
+        <div style="display:flex; gap:12px; align-items:center;">
+            <div class="lang-switcher">
+                <a href="?lang=tr">🇹🇷 Türkçe</a>
+                <a href="?lang=en">🇬🇧 English</a>
+            </div>
+            <form method="post" action="${pageContext.request.contextPath}/auth/logout">
+                <button type="submit" class="danger-btn" style="padding: 10px 20px;">
+                    <spring:message code="common.logout"/>
+                </button>
+            </form>
         </div>
     </section>
 

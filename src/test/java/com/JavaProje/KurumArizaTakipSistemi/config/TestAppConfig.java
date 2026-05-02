@@ -1,31 +1,31 @@
 package com.JavaProje.KurumArizaTakipSistemi.config;
 
-
 import com.JavaProje.KurumArizaTakipSistemi.model.*;
 import com.JavaProje.KurumArizaTakipSistemi.model.Role;
 import org.hibernate.cfg.AvailableSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.lang.NonNull;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import java.io.InputStream;
 
 import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
-@EnableScheduling
 @ComponentScans(value = {
         @ComponentScan("com.JavaProje.KurumArizaTakipSistemi.service"),
         @ComponentScan("com.JavaProje.KurumArizaTakipSistemi.dao")
 })
-@PropertySource(value = "classpath:hibernate.properties", encoding = "UTF-8")
-@PropertySource(value = "classpath:ai.properties", encoding = "UTF-8")
-public class AppConfig {
+@PropertySource(value = "classpath:hibernate-test.properties", encoding = "UTF-8")
+public class TestAppConfig {
 
     @Autowired
     private Environment env;
@@ -66,18 +66,31 @@ public class AppConfig {
         transactionManager.setSessionFactory(getSessionFactory().getObject());
         return transactionManager;
     }
+
     @Bean
-    public JavaMailSender getMailSender() {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(587);
-        mailSender.setUsername(env.getProperty("mail.username"));
-        mailSender.setPassword(env.getProperty("mail.password"));
+    public JavaMailSender javaMailSender() {
+        return new JavaMailSender() {
+            @Override
+            public MimeMessage createMimeMessage() {
+                return new MimeMessage((Session) null);
+            }
 
-        Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
+            @Override
+            public MimeMessage createMimeMessage(@NonNull InputStream contentStream) {
+                return new MimeMessage((Session) null);
+            }
 
-        return mailSender;
+            @Override
+            public void send(@NonNull MimeMessage mimeMessage) {}
+
+            @Override
+            public void send(@NonNull MimeMessage... mimeMessages) {}
+
+            @Override
+            public void send(@NonNull SimpleMailMessage simpleMessage) {}
+
+            @Override
+            public void send(@NonNull SimpleMailMessage... simpleMessages) {}
+        };
     }
 }

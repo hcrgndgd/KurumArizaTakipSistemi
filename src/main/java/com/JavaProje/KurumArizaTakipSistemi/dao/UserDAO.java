@@ -126,4 +126,13 @@ public class UserDAO {
 
         return count != null ? count : 0L;
     }
+
+    public int deleteExpiredUnverifiedUsers() {
+        return getSession()
+                .createMutationQuery(
+                        "DELETE FROM User u WHERE u.Verified = false " +
+                                "AND u.tokenExpiresAt < :now")
+                .setParameter("now", java.time.LocalDateTime.now())
+                .executeUpdate();
+    }
 }

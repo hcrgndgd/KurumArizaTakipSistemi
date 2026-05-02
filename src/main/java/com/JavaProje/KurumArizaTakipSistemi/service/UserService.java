@@ -42,7 +42,7 @@ public class UserService {
         return hashPassword(rawPassword).equals(hashedPassword);
     }
 
-    private List<String> allowedEmailDomains = List.of("ogr.duzce.edu.tr", "gmail.com");
+    private final List<String> allowedEmailDomains = List.of("ogr.duzce.edu.tr");
 
 
     @Transactional
@@ -299,5 +299,38 @@ public class UserService {
 
         userDAO.save(admin);
         logger.warn("Default admin user created. Change the bootstrap password after first login | email={}", email);
+    }
+    @Transactional
+    public void sendPasswordResetEmail(String email) {
+        logger.info("UserService.sendPasswordResetEmail() - email={}", email);
+
+        User user = userDAO.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Bu e-posta adresi kayıtlı değil."));
+
+        String token = UUID.randomUUID().toString().replace("-", "");
+        user.setVerificationToken(token);
+        user.setTokenExpiresAt(LocalDateTime.now().plusHours(1));
+        userDAO.update(user);
+
+        emailService.sendPasswordResetEmail(email, user.getFullName(), token);
+        logger.info("Şifre sıfırlama maili gönderildi | email={}", email);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        logger.info("UserService.resetPassword() - token={}", token);
+
+        User user = userDAO.findByVerificationToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Geçersiz veya süresi dolmuş bağlantı."));
+
+        if (user.getTokenExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Bağlantının süresi dolmuş.");
+        }
+
+        user.setPasswordHash(hashPassword(newPassword));
+        user.setVerificationToken(null);
+        user.setTokenExpiresAt(null);
+        userDAO.update(user);
+        logger.info("Şifre sıfırlandı | email={}", user.getEmail());
     }
 }
