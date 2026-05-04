@@ -137,12 +137,44 @@ public class TicketDAO {
         return count != null ? count : 0L;
     }
 
+    /**
+     * Count all tickets related to a user (where the user is either the requester or assigned technician)
+     *
+     * @param userId the ID of the user
+     * @return the number of tickets
+     */
+    public long countTicketsByUserId(Long userId) {
+        logger.debug("TicketDAO.countTicketsByUserId() - userId={}", userId);
+        Long count = getSession()
+                .createQuery("SELECT COUNT(t) FROM Ticket t WHERE t.requester.userId = :userId " +
+                        "OR t.assignedTechnician.userId = :userId", Long.class)
+                .setParameter("userId", userId)
+                .getSingleResult();
+        return count != null ? count : 0L;
+    }
+
     public int deleteExpiredUnverifiedUsers() {
         return getSession()
                 .createMutationQuery(
                         "DELETE FROM Ticket t WHERE t.assignedTechnician IS NULL " +
                                 "AND t.createdAt < :cutoff")
                 .setParameter("cutoff", java.time.LocalDateTime.now().minusDays(30))
+                .executeUpdate();
+    }
+
+    /**
+     * Delete all tickets related to a user (where the user is either the requester or assigned technician)
+     *
+     * @param userId the ID of the user
+     * @return the number of tickets deleted
+     */
+    public int deleteTicketsByUserId(Long userId) {
+        logger.debug("TicketDAO.deleteTicketsByUserId() - userId={}", userId);
+        return getSession()
+                .createMutationQuery(
+                        "DELETE FROM Ticket t WHERE t.requester.userId = :userId " +
+                                "OR t.assignedTechnician.userId = :userId")
+                .setParameter("userId", userId)
                 .executeUpdate();
     }
 }

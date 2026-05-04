@@ -2,6 +2,7 @@ package com.JavaProje.KurumArizaTakipSistemi.service;
 
 
 import com.JavaProje.KurumArizaTakipSistemi.dao.RoleDAO;
+import com.JavaProje.KurumArizaTakipSistemi.dao.TicketDAO;
 import com.JavaProje.KurumArizaTakipSistemi.dao.UserDAO;
 import com.JavaProje.KurumArizaTakipSistemi.model.Role;
 import com.JavaProje.KurumArizaTakipSistemi.model.User;
@@ -29,6 +30,9 @@ public class UserService {
     private RoleDAO roleDAO;
 
     @Autowired
+    private TicketDAO ticketDAO;
+
+    @Autowired
     private EmailService emailService;
 
     @Autowired
@@ -42,7 +46,7 @@ public class UserService {
         return hashPassword(rawPassword).equals(hashedPassword);
     }
 
-    private final List<String> allowedEmailDomains = List.of("ogr.duzce.edu.tr");
+    private  List<String> allowedEmailDomains = List.of("ogr.duzce.edu.tr","gmail.com");
 
 
     @Transactional
@@ -189,7 +193,13 @@ public class UserService {
         User user = userDAO.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("This user doesn't exist"));
 
+        // First, delete all tickets where this user is the requester or assigned technician
+        int deletedTickets = ticketDAO.deleteTicketsByUserId(id);
+        logger.info("UserService.deleteUser() - deleted {} tickets for userId={}", deletedTickets, id);
+
+        // Then delete the user
         userDAO.delete(user);
+        logger.info("UserService.deleteUser() - user deleted successfully - id={}", id);
     }
 
     @Transactional

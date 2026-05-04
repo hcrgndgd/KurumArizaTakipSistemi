@@ -267,6 +267,18 @@ public class TicketService {
         return ticketDAO.countByRequesterId(userId);
     }
 
+    /**
+     * Count all tickets related to a user (where the user is either the requester or assigned technician)
+     *
+     * @param userId User ID
+     * @return Number of tickets
+     */
+    @Transactional(readOnly = true)
+    public long countTicketsByUserId(Long userId) {
+        logger.info("TicketService.countTicketsByUserId() - userId={}", userId);
+        return ticketDAO.countTicketsByUserId(userId);
+    }
+
 
 
     @Transactional

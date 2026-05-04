@@ -146,7 +146,7 @@ public class UserController {
         
         try {
             if (categoryId == null) {
-                categoryId = categorySuggestionService.resolveCategory(null, title, description)
+                categoryId = categorySuggestionService.resolveCategory(title, description)
                         .map(tc -> tc.getCategoryId())
                         .orElse(null);
                 logger.info("POST /user/tickets - Category determined by Gemini AI: {}", categoryId);

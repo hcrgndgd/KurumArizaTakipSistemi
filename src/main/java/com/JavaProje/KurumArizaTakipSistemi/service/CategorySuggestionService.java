@@ -41,12 +41,8 @@ public class CategorySuggestionService {
     /**
      * Resolve category by id or suggest using Gemini.
      */
-    public Optional<TicketCategory> resolveCategory(Integer categoryId, String title, String description) {
-        if (categoryId != null) {
-            return categoryCatalogService.ensureDefaultsAndList().stream()
-                    .filter(c -> c.getCategoryId().equals(categoryId))
-                    .findFirst();
-        }
+    public Optional<TicketCategory> resolveCategory(String title, String description) {
+
         return suggestCategory(title, description);
     }
 

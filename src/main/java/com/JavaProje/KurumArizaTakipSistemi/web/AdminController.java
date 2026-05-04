@@ -47,13 +47,41 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable("id") long id)
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("id") long id, @RequestParam(value = "confirm", defaultValue = "false") boolean confirm)
     {
-        logger.info("API_REQUEST | class=AdminController | method=deleteUser | endpoint=DELETE /admin/users/{} | userId={}", id, id);
+        logger.info("API_REQUEST | class=AdminController | method=deleteUser | endpoint=DELETE /admin/users/{} | userId={} | confirm={}", id, id, confirm);
         try {
+            // Check how many tickets this user has before deletion
+            long ticketCount = ticketService.countTicketsByUserId(id);
+            logger.info("User deletion check - userId={} has {} tickets", id, ticketCount);
+
+            // If user has tickets and confirmation is not provided, require confirmation
+            if (ticketCount > 0 && !confirm) {
+                Map<String, Object> confirmationResponse = new LinkedHashMap<>();
+                confirmationResponse.put("confirmation_required", true);
+                confirmationResponse.put("message", "Bu kullanıcıya ait " + ticketCount + " adet ticket bulunmaktadır. Silmek istediğinizden emin misiniz?");
+                confirmationResponse.put("ticketCount", ticketCount);
+                confirmationResponse.put("userId", id);
+                confirmationResponse.put("confirmUrl", "/admin/users/" + id + "?confirm=true");
+
+                logger.info("API_CONFIRMATION_REQUIRED | class=AdminController | method=deleteUser | endpoint=DELETE /admin/users/{} | userId={} | ticketCount={}", id, id, ticketCount);
+                return ResponseEntity.ok(confirmationResponse);
+            }
+
+            // Proceed with deletion (either no tickets or confirmation provided)
             userService.deleteUser(id);
-            logger.info("API_SUCCESS | class=AdminController | method=deleteUser | endpoint=DELETE /admin/users/{} | userId={}", id, id);
-            return ResponseEntity.ok(Map.of("message", "User deleted successfully."));
+
+            // Return success message with ticket count information
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("message", "User deleted successfully.");
+            response.put("deletedTickets", ticketCount);
+
+            if (ticketCount > 0) {
+                response.put("warning", "Bu kullanıcıya ait " + ticketCount + " adet ticket silindi.");
+            }
+
+            logger.info("API_SUCCESS | class=AdminController | method=deleteUser | endpoint=DELETE /admin/users/{} | userId={} | deletedTickets={}", id, id, ticketCount);
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             logger.warn("API_VALIDATION_FAILED | class=AdminController | method=deleteUser | endpoint=DELETE /admin/users/{} | userId={} | reason={}", id, id, e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
