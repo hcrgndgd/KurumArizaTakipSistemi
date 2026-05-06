@@ -186,7 +186,7 @@
                 </a>
             </span>
             <span class="forgot-link">
-                🔑 <a href="${pageContext.request.contextPath}/forgot-password">
+                 <a href="${pageContext.request.contextPath}/auth/forgot-password">
                     <spring:message code="auth.forgot.title"/>
                 </a>
             </span>
