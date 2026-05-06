@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.Map;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,9 +25,9 @@ import java.util.List;
 public class TicketService {
 
     private static final Logger logger = LoggerFactory.getLogger(TicketService.class);
-    private static final String STATUS_OPEN = "OPEN";
-    private static final String STATUS_ASSIGNED = "FIXING";
-    private static final String STATUS_CLOSED = "CLOSED";
+    private static final String STATUS_OPEN = "Açık";
+    private static final String STATUS_ASSIGNED = "İşlemde";
+    private static final String STATUS_CLOSED = "Kapalı";
     private static final List<String> DEFAULT_STATUS_NAMES = List.of(STATUS_OPEN, STATUS_ASSIGNED, STATUS_CLOSED);
 
     @Autowired
@@ -228,6 +228,13 @@ public class TicketService {
         return ticketStatusDAO.findAll();
     }
 
+
+    private static final Map<String, String> DEFAULT_STATUS_NAMES_WITH_EN = Map.of(
+            "Açık",    "Open",
+            "İşlemde", "In Progress",
+            "Kapalı",  "Closed"
+    );
+
     @Transactional
     public void ensureDefaultTicketStatuses() {
         logger.info("REFERENCE_DATA_SEED | class=TicketService | method=ensureDefaultTicketStatuses | target=ticket_Statuses | required={}", DEFAULT_STATUS_NAMES);
@@ -242,14 +249,17 @@ public class TicketService {
             if (existingStatus == null) {
                 TicketStatus status = new TicketStatus();
                 status.setStatusName(statusName);
+                status.setStatusNameEn(DEFAULT_STATUS_NAMES_WITH_EN.get(statusName));
                 ticketStatusDAO.save(status);
                 logger.info("REFERENCE_DATA_CREATED | class=TicketService | method=ensureDefaultTicketStatuses | status={}", statusName);
-            } else if (!statusName.equals(existingStatus.getStatusName())) {
-                String previousStatusName = existingStatus.getStatusName();
-                existingStatus.setStatusName(statusName);
-                ticketStatusDAO.update(existingStatus);
-                logger.info("REFERENCE_DATA_NORMALIZED | class=TicketService | method=ensureDefaultTicketStatuses | previousStatus={} | normalizedStatus={}", previousStatusName, statusName);
             } else {
+                if (!statusName.equals(existingStatus.getStatusName())) {
+                    existingStatus.setStatusName(statusName);
+                }
+                if (existingStatus.getStatusNameEn() == null) {
+                    existingStatus.setStatusNameEn(DEFAULT_STATUS_NAMES_WITH_EN.get(statusName));
+                }
+                ticketStatusDAO.update(existingStatus);
                 logger.debug("REFERENCE_DATA_EXISTS | class=TicketService | method=ensureDefaultTicketStatuses | status={}", statusName);
             }
         }

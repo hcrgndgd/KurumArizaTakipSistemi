@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +52,7 @@ public class TechnicianController {
 
             model.addAttribute("tickets", availableTickets);
             model.addAttribute("technician", technician);
+            model.addAttribute("locale", LocaleContextHolder.getLocale());
             logger.info("GET /technician/tickets - {} unassigned tickets found", availableTickets.size());
         } catch (Exception e) {
             logger.error("GET /technician/tickets - failed", e);
@@ -82,7 +84,8 @@ public class TechnicianController {
             model.addAttribute("tickets", activeTickets);
             model.addAttribute("completedTickets", completedTickets);
             model.addAttribute("technician", technician);
-            logger.info("GET /technician/my-tickets - {} active tickets, {} completed tickets found | technician={}",
+            model.addAttribute("locale", LocaleContextHolder.getLocale());
+            logger.info("GET /technician/my-tickets - {} active, {} completed | technician={}",
                     activeTickets.size(), completedTickets.size(), technician.getEmail());
         } catch (Exception e) {
             logger.error("GET /technician/my-tickets - failed", e);
@@ -123,7 +126,6 @@ public class TechnicianController {
 
     @PostMapping("/tickets/{id}/finish")
     public String finishTicket(@PathVariable("id") Integer id, HttpSession session) {
-
         logger.info("POST /technician/tickets/{}/finish - closing ticket", id);
 
         User technician = getAuthenticatedTechnician(session);
@@ -194,6 +196,6 @@ public class TechnicianController {
         return ticket != null
                 && ticket.getStatus() != null
                 && ticket.getStatus().getStatusName() != null
-                && "CLOSED".equalsIgnoreCase(ticket.getStatus().getStatusName().trim());
+                && "Kapalı".equalsIgnoreCase(ticket.getStatus().getStatusName().trim());
     }
 }

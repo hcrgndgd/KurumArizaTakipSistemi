@@ -9,20 +9,21 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CategoryCatalogService {
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryCatalogService.class);
 
-    private static final List<String> DEFAULT_CATEGORIES = List.of(
-            "Yazilim",
-            "Donanim",
-            "Ag",
-            "Tesisat",
-            "Guvenlik",
-            "Malzeme eksikligi",
-            "Elektrik"
+    private static final Map<String, String> DEFAULT_CATEGORIES = Map.of(
+            "Yazilim",           "Software",
+            "Donanim",           "Hardware",
+            "Ag",                "Network",
+            "Tesisat",           "Plumbing",
+            "Guvenlik",          "Security",
+            "Malzeme eksikligi", "Material Shortage",
+            "Elektrik",          "Electrical"
     );
 
     private final TicketCategoryDAO categoryDao;
@@ -38,11 +39,12 @@ public class CategoryCatalogService {
             return existing;
         }
 
-        for (String categoryName : DEFAULT_CATEGORIES) {
+        for (Map.Entry<String, String> entry : DEFAULT_CATEGORIES.entrySet()) {
             TicketCategory category = new TicketCategory();
-            category.setCategoryName(categoryName);
+            category.setCategoryName(entry.getKey());
+            category.setCategoryNameEn(entry.getValue());
             categoryDao.save(category);
-            logger.info("Seeded category: {}", categoryName);
+            logger.info("Seeded category: {} / {}", entry.getKey(), entry.getValue());
         }
 
         return categoryDao.findAll();

@@ -159,8 +159,14 @@
               <td>${ticket.ticketId}</td>
               <td>${ticket.title}</td>
               <td>${ticket.description}</td>
-              <td>${ticket.category.categoryName}</td>
-              <td><span class="badge badge-waiting">${ticket.status.statusName}</span></td>
+              <td>
+                  ${locale.language == 'tr' ? ticket.category.categoryName : (not empty ticket.category.categoryNameEn ? ticket.category.categoryNameEn : ticket.category.categoryName)}
+              </td>
+              <td>
+    <span class="badge badge-waiting">
+        ${locale.language == 'tr' ? ticket.status.statusName : (not empty ticket.status.statusNameEn ? ticket.status.statusNameEn : ticket.status.statusName)}
+    </span>
+              </td>
               <td>${ticket.formattedCreatedAt}</td>
               <td>
                 <form method="post" action="${pageContext.request.contextPath}/technician/tickets/${ticket.ticketId}/assign">

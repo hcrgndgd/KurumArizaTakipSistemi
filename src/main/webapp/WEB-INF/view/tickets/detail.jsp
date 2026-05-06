@@ -157,32 +157,33 @@
             <div class="section-content" style="white-space: pre-wrap;">${ticket.description}</div>
         </div>
 
-        <div class="meta-grid">
-            <div class="meta-item">
-                <div class="meta-label"><spring:message code="ticket.status"/></div>
-                <div class="meta-value">
-                    <c:choose>
-                        <c:when test="${not empty ticket.status}">
-              <span class="status-badge status-${fn:toLowerCase(ticket.status.statusName)}">
-                      ${ticket.status.statusName}
-              </span>
-                        </c:when>
-                        <c:otherwise>
-                            <span class="status-badge status-open"><spring:message code="ticket.status.open"/></span>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
+        <div class="meta-item">
+            <div class="meta-label"><spring:message code="ticket.status"/></div>
+            <div class="meta-value">
+                <c:choose>
+                    <c:when test="${not empty ticket.status}">
+                <span class="status-badge status-${fn:toLowerCase(ticket.status.statusName)}">
+                        ${locale.language == 'tr' ? ticket.status.statusName : (not empty ticket.status.statusNameEn ? ticket.status.statusNameEn : ticket.status.statusName)}
+                </span>
+                    </c:when>
+                    <c:otherwise>
+                        <span class="status-badge status-open"><spring:message code="ticket.status.open"/></span>
+                    </c:otherwise>
+                </c:choose>
             </div>
+        </div>
 
-            <div class="meta-item">
-                <div class="meta-label"><spring:message code="ticket.category"/></div>
-                <div class="meta-value">
-                    <c:choose>
-                        <c:when test="${not empty ticket.category}">${ticket.category.categoryName}</c:when>
-                        <c:otherwise>-</c:otherwise>
-                    </c:choose>
-                </div>
+        <div class="meta-item">
+            <div class="meta-label"><spring:message code="ticket.category"/></div>
+            <div class="meta-value">
+                <c:choose>
+                    <c:when test="${not empty ticket.category}">
+                        ${locale.language == 'tr' ? ticket.category.categoryName : (not empty ticket.category.categoryNameEn ? ticket.category.categoryNameEn : ticket.category.categoryName)}
+                    </c:when>
+                    <c:otherwise>-</c:otherwise>
+                </c:choose>
             </div>
+        </div>
 
             <div class="meta-item">
                 <div class="meta-label"><spring:message code="ticket.created.at"/></div>

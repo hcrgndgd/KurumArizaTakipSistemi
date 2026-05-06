@@ -42,7 +42,7 @@ public class UserService {
         return hashPassword(rawPassword).equals(hashedPassword);
     }
 
-    private final List<String> allowedEmailDomains = List.of("ogr.duzce.edu.tr");
+    private final List<String> allowedEmailDomains = List.of("ogr.duzce.edu.tr","gmail.com");
 
 
     @Transactional

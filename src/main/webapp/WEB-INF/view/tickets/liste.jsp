@@ -162,16 +162,18 @@
                     </td>
                     <td>
                         <c:choose>
-                            <c:when test="${not empty t.category}">${t.category.categoryName}</c:when>
+                            <c:when test="${not empty t.category}">
+                                ${locale.language == 'tr' ? t.category.categoryName : (not empty t.category.categoryNameEn ? t.category.categoryNameEn : t.category.categoryName)}
+                            </c:when>
                             <c:otherwise>-</c:otherwise>
                         </c:choose>
                     </td>
                     <td>
                         <c:choose>
                             <c:when test="${not empty t.status}">
-                <span class="status-badge status-${fn:toLowerCase(t.status.statusName)}">
-                        ${t.status.statusName}
-                </span>
+            <span class="status-badge status-${fn:toLowerCase(t.status.statusName)}">
+                    ${locale.language == 'tr' ? t.status.statusName : (not empty t.status.statusNameEn ? t.status.statusNameEn : t.status.statusName)}
+            </span>
                             </c:when>
                             <c:otherwise>-</c:otherwise>
                         </c:choose>

@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -32,9 +33,24 @@ public class TicketStatus {
     @Column(name = "StatusName", nullable = false, length = 50)
     private String statusName;
 
+    @Column(name = "StatusNameEn", nullable = false,length = 50)
+    private String statusNameEn;
+
     /**
      * Bidirectional relationship: One status can belong to many tickets.
      */
     @OneToMany(mappedBy = "status")
     private Set<Ticket> tickets;
+
+    /**
+     * Verilen locale'e göre durum adını döndürür.
+     * locale tr ise statusName, diğer durumlarda statusNameEn döner.
+     * statusNameEn null ise statusName döner.
+     */
+    public String getLocalizedName(Locale locale) {
+        if (locale != null && locale.getLanguage().equals("tr")) {
+            return statusName;
+        }
+        return statusNameEn != null ? statusNameEn : statusName;
+    }
 }

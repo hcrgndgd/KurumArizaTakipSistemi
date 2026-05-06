@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.Builder;
 import lombok.AllArgsConstructor;
 
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -36,9 +37,24 @@ public class TicketCategory {
     @Column(name = "CategoryName", nullable = false, length = 100)
     private String categoryName;
 
+    @Column(name = "CategoryNameEn", nullable = false,length = 100)
+    private String categoryNameEn;
+
     /**
      * Bidirectional relationship: One category can contain many tickets.
      */
     @OneToMany(mappedBy = "category")
     private Set<Ticket> tickets;
+
+    /**
+     * Verilen locale'e göre kategori adını döndürür.
+     * locale tr ise categoryName, diğer durumlarda categoryNameEn döner.
+     * categoryNameEn null ise categoryName döner.
+     */
+    public String getLocalizedName(Locale locale) {
+        if (locale != null && locale.getLanguage().equals("tr")) {
+            return categoryName;
+        }
+        return categoryNameEn != null ? categoryNameEn : categoryName;
+    }
 }

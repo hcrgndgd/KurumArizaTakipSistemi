@@ -145,8 +145,14 @@
             <tr>
               <td>${ticket.ticketId}</td>
               <td>${ticket.title}</td>
-              <td>${ticket.category.categoryName}</td>
-              <td><span class="badge badge-started">${ticket.status.statusName}</span></td>
+              <td>
+                  ${locale.language == 'tr' ? ticket.category.categoryName : (not empty ticket.category.categoryNameEn ? ticket.category.categoryNameEn : ticket.category.categoryName)}
+              </td>
+              <td>
+    <span class="badge badge-started">
+        ${locale.language == 'tr' ? ticket.status.statusName : (not empty ticket.status.statusNameEn ? ticket.status.statusNameEn : ticket.status.statusName)}
+    </span>
+              </td>
               <td>${ticket.formattedCreatedAt}</td>
               <td>
                 <div class="actions-row">
@@ -198,8 +204,14 @@
             <tr>
               <td>${ticket.ticketId}</td>
               <td>${ticket.title}</td>
-              <td>${ticket.category.categoryName}</td>
-              <td><span class="badge badge-done">${ticket.status.statusName}</span></td>
+              <td>
+                  ${locale.language == 'tr' ? ticket.category.categoryName : (not empty ticket.category.categoryNameEn ? ticket.category.categoryNameEn : ticket.category.categoryName)}
+              </td>
+              <td>
+    <span class="badge badge-done">
+        ${locale.language == 'tr' ? ticket.status.statusName : (not empty ticket.status.statusNameEn ? ticket.status.statusNameEn : ticket.status.statusName)}
+    </span>
+              </td>
               <td>${ticket.formattedCreatedAt}</td>
             </tr>
           </c:forEach>
