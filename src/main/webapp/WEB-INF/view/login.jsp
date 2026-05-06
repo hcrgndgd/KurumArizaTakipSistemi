@@ -163,7 +163,7 @@
                 <label for="email"><spring:message code="auth.login.email"/></label>
                 <input id="email" name="email" type="email"
                        autocomplete="off"
-                       placeholder="name@duzce.edu.tr" required>
+                       placeholder="name@ogr.duzce.edu.tr" required>
             </div>
 
             <div class="field">

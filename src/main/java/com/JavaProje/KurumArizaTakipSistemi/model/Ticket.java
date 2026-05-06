@@ -46,9 +46,8 @@ public class  Ticket {
      * The user who created the ticket.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "RequesterId", nullable = false)
+    @JoinColumn(name = "RequesterId", nullable = true)
     private User requester;
-
     /**
      * The technician assigned to solve the ticket.
      * Can be null initially until the system auto-assigns it.

@@ -2,6 +2,7 @@ package com.JavaProje.KurumArizaTakipSistemi.service;
 
 
 import com.JavaProje.KurumArizaTakipSistemi.dao.RoleDAO;
+import com.JavaProje.KurumArizaTakipSistemi.dao.TicketDAO;
 import com.JavaProje.KurumArizaTakipSistemi.dao.UserDAO;
 import com.JavaProje.KurumArizaTakipSistemi.model.Role;
 import com.JavaProje.KurumArizaTakipSistemi.model.User;
@@ -34,6 +35,9 @@ public class UserService {
     @Autowired
     private Environment env;
 
+    @Autowired
+    private TicketDAO ticketDAO;
+
     private String hashPassword(String password) {
         return org.springframework.util.DigestUtils.md5DigestAsHex(password.getBytes());
     }
@@ -42,7 +46,7 @@ public class UserService {
         return hashPassword(rawPassword).equals(hashedPassword);
     }
 
-    private final List<String> allowedEmailDomains = List.of("ogr.duzce.edu.tr","gmail.com");
+    private final List<String> allowedEmailDomains = List.of("ogr.duzce.edu.tr");
 
 
     @Transactional
@@ -188,6 +192,13 @@ public class UserService {
         User user = userDAO.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("This user doesn't exist"));
 
+        // Kullanıcının açtığı ticketlardaki requesterId'yi null yap
+        ticketDAO.nullifyRequesterByUserId(id);
+
+        // Teknisyene atanmış ticketlardaki assignedTechnicianId'yi null yap
+        ticketDAO.nullifyAssignedTechnicianByUserId(id);
+
+        // Kullanıcıyı sil
         userDAO.delete(user);
     }
 

@@ -23,7 +23,8 @@ public class CategoryCatalogService {
             "Tesisat",           "Plumbing",
             "Guvenlik",          "Security",
             "Malzeme eksikligi", "Material Shortage",
-            "Elektrik",          "Electrical"
+            "Elektrik",          "Electrical",
+            "Demirbas",          "Fixture"
     );
 
     private final TicketCategoryDAO categoryDao;

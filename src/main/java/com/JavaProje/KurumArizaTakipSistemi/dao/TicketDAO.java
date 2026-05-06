@@ -145,4 +145,19 @@ public class TicketDAO {
                 .setParameter("cutoff", java.time.LocalDateTime.now().minusDays(30))
                 .executeUpdate();
     }
+
+    public void nullifyRequesterByUserId(long userId) {
+        logger.debug("TicketDAO.nullifyRequesterByUserId() - userId={}", userId);
+        getSession()
+                .createMutationQuery("UPDATE Ticket t SET t.requester = null WHERE t.requester.userId = :userId")
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+    public void nullifyAssignedTechnicianByUserId(long userId) {
+        logger.debug("TicketDAO.nullifyAssignedTechnicianByUserId() - userId={}", userId);
+        getSession()
+                .createMutationQuery("UPDATE Ticket t SET t.assignedTechnician = null WHERE t.assignedTechnician.userId = :userId")
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
 }
