@@ -156,6 +156,10 @@
                 <a href="?lang=tr">🇹🇷 Türkçe</a>
                 <a href="?lang=en">🇬🇧 English</a>
             </div>
+            <a href="${pageContext.request.contextPath}/user/profile"
+               class="secondary-btn" style="padding: 10px 20px; text-decoration: none; border-radius: 14px; font-weight: 700;">
+                 <spring:message code="profile.title"/>
+            </a>
             <form method="post" action="${pageContext.request.contextPath}/auth/logout">
                 <button type="submit" class="danger-btn" style="padding: 10px 20px;">
                     <spring:message code="common.logout"/>

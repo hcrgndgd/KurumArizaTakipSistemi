@@ -134,28 +134,6 @@ public class TicketService {
                 .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
     }
 
-    /**
-     * Update ticket status.
-     *
-     * @param ticketId Ticket ID
-     * @param statusId Status ID
-     */
-    @Transactional
-    public void updateTicketStatus(Integer ticketId, Integer statusId) {
-        logger.info("TicketService.updateTicketStatus() - ticketId={}, statusId={}", ticketId, statusId);
-
-        Ticket ticket = ticketDAO.findById(ticketId)
-                .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
-
-        TicketStatus status = ticketStatusDAO.findById(statusId)
-                .orElseThrow(() -> new IllegalArgumentException("Status not found"));
-
-        ticket.setStatus(status);
-        ticket.setUpdatedAt(LocalDateTime.now());
-        ticketDAO.update(ticket);
-
-        logger.info("Ticket status updated - ticketId={}, newStatus={}", ticketId, status.getStatusName());
-    }
 
     /**
      * Assign ticket to a technician.
@@ -182,31 +160,6 @@ public class TicketService {
     }
 
     /**
-     * Update ticket.
-     *
-     * @param ticket Ticket to update
-     */
-    @Transactional
-    public void updateTicket(Ticket ticket) {
-        logger.info("TicketService.updateTicket() - ticketId={}", ticket.getTicketId());
-        ticket.setUpdatedAt(LocalDateTime.now());
-        ticketDAO.update(ticket);
-    }
-
-    /**
-     * Delete ticket.
-     *
-     * @param ticketId Ticket ID
-     */
-    @Transactional
-    public void deleteTicket(Integer ticketId) {
-        logger.info("TicketService.deleteTicket() - ticketId={}", ticketId);
-        Ticket ticket = ticketDAO.findById(ticketId)
-                .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
-        ticketDAO.delete(ticket);
-    }
-
-    /**
      * Get all categories.
      *
      * @return List of all categories
@@ -215,17 +168,6 @@ public class TicketService {
     public List<TicketCategory> getAllCategories() {
         logger.info("TicketService.getAllCategories()");
         return ticketCategoryDAO.findAll();
-    }
-
-    /**
-     * Get all statuses.
-     *
-     * @return List of all statuses
-     */
-    @Transactional(readOnly = true)
-    public List<TicketStatus> getAllStatuses() {
-        logger.info("TicketService.getAllStatuses()");
-        return ticketStatusDAO.findAll();
     }
 
 

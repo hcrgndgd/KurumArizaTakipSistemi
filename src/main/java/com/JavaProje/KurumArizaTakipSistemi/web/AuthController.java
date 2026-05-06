@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,13 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private MessageSource messageSource;
+
+    private String getMessage(String key) {
+        return messageSource.getMessage(key, null, key, LocaleContextHolder.getLocale());
+    }
+
     @PostMapping("/register")
     public String register(
             @RequestParam("fullName") String fullName,
@@ -31,11 +40,11 @@ public class AuthController {
         try {
             userService.registerUser(fullName, email, password);
             logger.info("Kayıt başarılı, doğrulama maili gönderildi | email={}", email);
-            model.addAttribute("success", "Kayıt başarılı! Lütfen e-posta adresinizi doğrulayın.");
+            model.addAttribute("success", getMessage("success.register"));
             return "register";
         } catch (IllegalArgumentException e) {
             logger.warn("Kayıt başarısız | email={} | sebep={}", email, e.getMessage());
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("error", getMessage(e.getMessage()));
             return "register";
         }
     }
@@ -63,7 +72,6 @@ public class AuthController {
             Model model) {
 
         logger.info("POST /auth/login - Giriş isteği | email={}", email);
-        logger.error("TEST ERROR LOG");
 
         try {
             User user = userService.login(email, password);
@@ -83,7 +91,7 @@ public class AuthController {
             }
         } catch (IllegalArgumentException e) {
             logger.warn("Giriş başarısız | email={} | sebep={}", email, e.getMessage());
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("error", getMessage(e.getMessage()));
             return "login";
         }
     }
@@ -108,14 +116,15 @@ public class AuthController {
 
         try {
             userService.resendVerificationEmail(email);
-            model.addAttribute("success", "Doğrulama maili tekrar gönderildi.");
+            model.addAttribute("success", getMessage("success.resend.verification"));
             return "login";
         } catch (IllegalArgumentException e) {
             logger.warn("Yeniden doğrulama başarısız | email={} | sebep={}", email, e.getMessage());
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("error", getMessage(e.getMessage()));
             return "login";
         }
     }
+
     @GetMapping("/forgot-password")
     public String showForgotPasswordForm() {
         return "forgot-password";
@@ -130,11 +139,11 @@ public class AuthController {
 
         try {
             userService.sendPasswordResetEmail(email);
-            model.addAttribute("success", "Şifre sıfırlama maili gönderildi.");
+            model.addAttribute("success", getMessage("success.forgot.password"));
             return "forgot-password";
         } catch (IllegalArgumentException e) {
             logger.warn("Şifre sıfırlama başarısız | email={} | sebep={}", email, e.getMessage());
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("error", getMessage(e.getMessage()));
             return "forgot-password";
         }
     }
@@ -155,7 +164,7 @@ public class AuthController {
         logger.info("POST /auth/reset-password - token={}", token);
 
         if (!password.equals(confirmPassword)) {
-            model.addAttribute("error", "Şifreler eşleşmiyor.");
+            model.addAttribute("error", getMessage("error.password.mismatch"));
             model.addAttribute("token", token);
             return "reset-password";
         }
@@ -165,7 +174,7 @@ public class AuthController {
             return "redirect:/login?reset=true";
         } catch (IllegalArgumentException e) {
             logger.warn("Şifre sıfırlama başarısız | sebep={}", e.getMessage());
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("error", getMessage(e.getMessage()));
             model.addAttribute("token", token);
             return "reset-password";
         }

@@ -74,6 +74,7 @@
 
     .btn { display: inline-block; padding: 8px 16px; border: 0; border-radius: 10px; font: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: transform 0.2s ease; text-decoration: none; }
     .btn-primary { color: #f8fafc; background: linear-gradient(135deg, var(--accent), var(--accent-strong)); box-shadow: 0 8px 20px rgba(15, 118, 110, 0.22); }
+    .btn-secondary { color: var(--text); background: var(--line); }
     .btn-danger { color: #f8fafc; background: linear-gradient(135deg, var(--danger), #8b1a12); box-shadow: 0 8px 20px rgba(180, 35, 24, 0.22); }
     .btn-success { color: #f8fafc; background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 8px 20px rgba(5, 150, 105, 0.22); }
     .btn:hover { transform: translateY(-1px); }
@@ -88,12 +89,15 @@
 <div class="container">
 
   <div class="header">
-    <h1 class="header-title">📋 <spring:message code="technician.my.tickets"/></h1>
+    <h1 class="header-title"> <spring:message code="technician.my.tickets"/></h1>
     <div class="nav-links">
       <div class="lang-switcher">
         <a href="?lang=tr">🇹🇷 Türkçe</a>
         <a href="?lang=en">🇬🇧 English</a>
       </div>
+      <a href="${pageContext.request.contextPath}/user/profile" class="btn btn-secondary">
+        👤 <spring:message code="profile.title"/>
+      </a>
       <a href="${pageContext.request.contextPath}/technician/tickets" class="btn btn-primary">
         <spring:message code="technician.pending"/>
       </a>
@@ -149,9 +153,9 @@
                   ${locale.language == 'tr' ? ticket.category.categoryName : (not empty ticket.category.categoryNameEn ? ticket.category.categoryNameEn : ticket.category.categoryName)}
               </td>
               <td>
-    <span class="badge badge-started">
-        ${locale.language == 'tr' ? ticket.status.statusName : (not empty ticket.status.statusNameEn ? ticket.status.statusNameEn : ticket.status.statusName)}
-    </span>
+                <span class="badge badge-started">
+                    ${locale.language == 'tr' ? ticket.status.statusName : (not empty ticket.status.statusNameEn ? ticket.status.statusNameEn : ticket.status.statusName)}
+                </span>
               </td>
               <td>${ticket.formattedCreatedAt}</td>
               <td>
@@ -208,9 +212,9 @@
                   ${locale.language == 'tr' ? ticket.category.categoryName : (not empty ticket.category.categoryNameEn ? ticket.category.categoryNameEn : ticket.category.categoryName)}
               </td>
               <td>
-    <span class="badge badge-done">
-        ${locale.language == 'tr' ? ticket.status.statusName : (not empty ticket.status.statusNameEn ? ticket.status.statusNameEn : ticket.status.statusName)}
-    </span>
+                <span class="badge badge-done">
+                    ${locale.language == 'tr' ? ticket.status.statusName : (not empty ticket.status.statusNameEn ? ticket.status.statusNameEn : ticket.status.statusName)}
+                </span>
               </td>
               <td>${ticket.formattedCreatedAt}</td>
             </tr>

@@ -176,7 +176,7 @@ public class UserController {
         try {
             Ticket ticket = ticketService.getTicketById(id);
 
-            if (!ticket.getRequester().getUserId().equals(currentUser.getUserId())) {
+            if (ticket.getRequester() == null || !ticket.getRequester().getUserId().equals(currentUser.getUserId())) {
                 logger.warn("GET /user/tickets/{} - Access denied for user: {}", id, currentUser.getEmail());
                 return "redirect:/user/tickets";
             }

@@ -42,15 +42,5 @@ public class TicketStatus {
     @OneToMany(mappedBy = "status")
     private Set<Ticket> tickets;
 
-    /**
-     * Verilen locale'e göre durum adını döndürür.
-     * locale tr ise statusName, diğer durumlarda statusNameEn döner.
-     * statusNameEn null ise statusName döner.
-     */
-    public String getLocalizedName(Locale locale) {
-        if (locale != null && locale.getLanguage().equals("tr")) {
-            return statusName;
-        }
-        return statusNameEn != null ? statusNameEn : statusName;
-    }
+
 }

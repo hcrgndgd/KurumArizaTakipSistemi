@@ -46,15 +46,5 @@ public class TicketCategory {
     @OneToMany(mappedBy = "category")
     private Set<Ticket> tickets;
 
-    /**
-     * Verilen locale'e göre kategori adını döndürür.
-     * locale tr ise categoryName, diğer durumlarda categoryNameEn döner.
-     * categoryNameEn null ise categoryName döner.
-     */
-    public String getLocalizedName(Locale locale) {
-        if (locale != null && locale.getLanguage().equals("tr")) {
-            return categoryName;
-        }
-        return categoryNameEn != null ? categoryNameEn : categoryName;
-    }
+
 }

@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: HacerGndgd
-  Date: 28.04.2026
-  Time: 22:05
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.JavaProje.KurumArizaTakipSistemi.model.User" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -83,6 +76,7 @@
 
     .btn { display: inline-block; padding: 8px 16px; border: 0; border-radius: 10px; font: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: transform 0.2s ease, opacity 0.2s ease; text-decoration: none; }
     .btn-primary { color: #f8fafc; background: linear-gradient(135deg, var(--accent), var(--accent-strong)); box-shadow: 0 8px 20px rgba(15, 118, 110, 0.22); }
+    .btn-secondary { color: var(--text); background: var(--line); }
     .btn-danger { color: #f8fafc; background: linear-gradient(135deg, var(--danger), #8b1a12); box-shadow: 0 8px 20px rgba(180, 35, 24, 0.22); }
     .btn:hover { transform: translateY(-1px); }
 
@@ -100,8 +94,11 @@
         <a href="?lang=tr">🇹🇷 Türkçe</a>
         <a href="?lang=en">🇬🇧 English</a>
       </div>
+      <a href="${pageContext.request.contextPath}/user/profile" class="btn btn-secondary">
+         <spring:message code="profile.title"/>
+      </a>
       <a href="${pageContext.request.contextPath}/technician/my-tickets" class="btn btn-primary">
-        📋 <spring:message code="technician.my.tickets"/>
+         <spring:message code="technician.my.tickets"/>
       </a>
       <form method="post" action="${pageContext.request.contextPath}/auth/logout"
             onsubmit="return confirm('<spring:message code="profile.logout.confirm"/>')">
@@ -163,9 +160,9 @@
                   ${locale.language == 'tr' ? ticket.category.categoryName : (not empty ticket.category.categoryNameEn ? ticket.category.categoryNameEn : ticket.category.categoryName)}
               </td>
               <td>
-    <span class="badge badge-waiting">
-        ${locale.language == 'tr' ? ticket.status.statusName : (not empty ticket.status.statusNameEn ? ticket.status.statusNameEn : ticket.status.statusName)}
-    </span>
+                <span class="badge badge-waiting">
+                    ${locale.language == 'tr' ? ticket.status.statusName : (not empty ticket.status.statusNameEn ? ticket.status.statusNameEn : ticket.status.statusName)}
+                </span>
               </td>
               <td>${ticket.formattedCreatedAt}</td>
               <td>

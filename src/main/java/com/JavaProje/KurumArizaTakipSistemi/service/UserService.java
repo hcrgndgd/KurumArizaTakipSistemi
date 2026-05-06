@@ -1,6 +1,5 @@
 package com.JavaProje.KurumArizaTakipSistemi.service;
 
-
 import com.JavaProje.KurumArizaTakipSistemi.dao.RoleDAO;
 import com.JavaProje.KurumArizaTakipSistemi.dao.TicketDAO;
 import com.JavaProje.KurumArizaTakipSistemi.dao.UserDAO;
@@ -48,25 +47,21 @@ public class UserService {
 
     private final List<String> allowedEmailDomains = List.of("ogr.duzce.edu.tr");
 
-
     @Transactional
     public void registerUser(String fullName, String email, String password) {
         logger.info("UserService.registerUser() - email={}", email);
 
         boolean isAllowed = false;
-        for(String allowedEmail: allowedEmailDomains)
-        {
-            if (email.toLowerCase().endsWith("@" + allowedEmail.toLowerCase()))
-            {
+        for (String allowedEmail : allowedEmailDomains) {
+            if (email.toLowerCase().endsWith("@" + allowedEmail.toLowerCase())) {
                 isAllowed = true;
                 break;
             }
         }
-        if(!isAllowed) throw new IllegalArgumentException("bu uzantılı uzantılı e-posta adresleri kabul edilmektedir.");
-
+        if (!isAllowed) throw new IllegalArgumentException("error.email.not.allowed");
 
         if (userDAO.existsByEmail(email)) {
-            throw new IllegalArgumentException("Bu e-posta adresi zaten kayıtlı.");
+            throw new IllegalArgumentException("error.email.exists");
         }
 
         Role userRole = roleDAO.findByName("USER").orElseGet(() -> {
@@ -111,21 +106,19 @@ public class UserService {
         }).orElse(false);
     }
 
-
-
     @Transactional(readOnly = true)
     public User login(String email, String password) {
         logger.info("UserService.login() - email={}", email);
 
         User user = userDAO.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("E-posta veya şifre hatalı."));
+                .orElseThrow(() -> new IllegalArgumentException("error.password.wrong"));
 
         if (!user.getVerified()) {
-            throw new IllegalArgumentException("E-posta adresiniz henüz doğrulanmamış.");
+            throw new IllegalArgumentException("error.email.not.verified");
         }
 
         if (!matchesPassword(password, user.getPasswordHash())) {
-            throw new IllegalArgumentException("E-posta veya şifre hatalı.");
+            throw new IllegalArgumentException("error.password.wrong");
         }
 
         logger.info("Giriş başarılı | email={}", email);
@@ -137,10 +130,10 @@ public class UserService {
         logger.info("UserService.resendVerificationEmail() - email={}", email);
 
         User user = userDAO.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Bu e-posta adresi kayıtlı değil."));
+                .orElseThrow(() -> new IllegalArgumentException("error.email.not.found"));
 
         if (user.getVerified()) {
-            throw new IllegalArgumentException("Bu hesap zaten doğrulanmış.");
+            throw new IllegalArgumentException("error.email.already.verified");
         }
 
         String token = UUID.randomUUID().toString().replace("-", "");
@@ -153,33 +146,25 @@ public class UserService {
     }
 
     @Transactional
-    public List<User> loadAllUsers()
-    {
+    public List<User> loadAllUsers() {
         logger.info("UserService.loadAllUsers()");
         return userDAO.findAll();
     }
 
-    @Transactional(readOnly = true)
-    public User getUserById(long userId) {
-        logger.info("UserService.getUserById() - userId={}", userId);
-        return userDAO.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("This user doesn't exist"));
-    }
 
     @Transactional
-    public void setRole(long userId, long roleId)
-    {
+    public void setRole(long userId, long roleId) {
         logger.info("UserService.setRole() - userId={} roleId={}", userId, roleId);
 
         User user = userDAO.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("This user doesn't exists"));
+                .orElseThrow(() -> new IllegalArgumentException("error.user.not.found"));
 
         if (roleId <= 0) {
-            throw new IllegalArgumentException("Role id is invalid");
+            throw new IllegalArgumentException("error.role.invalid");
         }
 
         Role persistedRole = roleDAO.findById(roleId)
-                .orElseThrow(() -> new IllegalArgumentException("This role doesn't exist"));
+                .orElseThrow(() -> new IllegalArgumentException("error.role.not.found"));
 
         user.setRole(persistedRole);
         userDAO.update(user);
@@ -190,15 +175,11 @@ public class UserService {
         logger.info("UserService.deleteUser() - id={}", id);
 
         User user = userDAO.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("This user doesn't exist"));
+                .orElseThrow(() -> new IllegalArgumentException("error.user.not.found"));
 
-        // Kullanıcının açtığı ticketlardaki requesterId'yi null yap
         ticketDAO.nullifyRequesterByUserId(id);
-
-        // Teknisyene atanmış ticketlardaki assignedTechnicianId'yi null yap
         ticketDAO.nullifyAssignedTechnicianByUserId(id);
 
-        // Kullanıcıyı sil
         userDAO.delete(user);
     }
 
@@ -207,12 +188,12 @@ public class UserService {
         logger.info("UserService.addRole() - role={}", roleName);
 
         if (roleName == null || roleName.isBlank()) {
-            throw new IllegalArgumentException("Role name cannot be blank");
+            throw new IllegalArgumentException("error.role.blank");
         }
 
         String normalizedRoleName = roleName.trim().toUpperCase();
         if (roleDAO.findByName(normalizedRoleName).isPresent()) {
-            throw new IllegalArgumentException("This role already exists");
+            throw new IllegalArgumentException("error.role.exists");
         }
 
         Role role = new Role();
@@ -225,14 +206,14 @@ public class UserService {
         logger.info("UserService.deleteRole() - role={}", roleName);
 
         if (roleName == null || roleName.isBlank()) {
-            throw new IllegalArgumentException("Role name cannot be blank");
+            throw new IllegalArgumentException("error.role.blank");
         }
 
         Role role = roleDAO.findByName(roleName.trim().toUpperCase())
-                .orElseThrow(() -> new IllegalArgumentException("This role doesn't exist"));
+                .orElseThrow(() -> new IllegalArgumentException("error.role.not.found"));
 
         if (userDAO.countByRole(role) > 0) {
-            throw new IllegalArgumentException("This role is assigned to users");
+            throw new IllegalArgumentException("error.role.assigned");
         }
 
         roleDAO.delete(role);
@@ -310,12 +291,13 @@ public class UserService {
         userDAO.save(admin);
         logger.warn("Default admin user created. Change the bootstrap password after first login | email={}", email);
     }
+
     @Transactional
     public void sendPasswordResetEmail(String email) {
         logger.info("UserService.sendPasswordResetEmail() - email={}", email);
 
         User user = userDAO.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Bu e-posta adresi kayıtlı değil."));
+                .orElseThrow(() -> new IllegalArgumentException("error.email.not.found"));
 
         String token = UUID.randomUUID().toString().replace("-", "");
         user.setVerificationToken(token);
@@ -331,10 +313,10 @@ public class UserService {
         logger.info("UserService.resetPassword() - token={}", token);
 
         User user = userDAO.findByVerificationToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Geçersiz veya süresi dolmuş bağlantı."));
+                .orElseThrow(() -> new IllegalArgumentException("error.token.invalid"));
 
         if (user.getTokenExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Bağlantının süresi dolmuş.");
+            throw new IllegalArgumentException("error.token.expired");
         }
 
         user.setPasswordHash(hashPassword(newPassword));
