@@ -61,129 +61,38 @@
     .header-actions { display: flex; gap: 12px; align-items: center; }
 
     .lang-switcher { font-size: 0.85rem; }
-    .lang-switcher a {
-      color: var(--accent-strong);
-      text-decoration: none;
-      font-weight: 600;
-      margin-left: 8px;
-    }
+    .lang-switcher a { color: var(--accent-strong); text-decoration: none; font-weight: 600; margin-left: 8px; }
     .lang-switcher a:hover { text-decoration: underline; }
 
-    .user-info {
-      background: var(--panel);
-      padding: 32px;
-      border-radius: 16px;
-      border: 1px solid rgba(214, 199, 178, 0.85);
-      box-shadow: var(--shadow);
-      margin-bottom: 32px;
-    }
-
+    .user-info { background: var(--panel); padding: 32px; border-radius: 16px; border: 1px solid rgba(214, 199, 178, 0.85); box-shadow: var(--shadow); margin-bottom: 32px; }
     .info-group { margin-bottom: 24px; }
+    .info-group label { display: block; font-weight: 700; color: var(--accent-strong); margin-bottom: 8px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-group p { margin: 0; font-size: 1.2rem; background: rgba(255, 255, 255, 0.5); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--line); }
 
-    .info-group label {
-      display: block;
-      font-weight: 700;
-      color: var(--accent-strong);
-      margin-bottom: 8px;
-      font-size: 0.95rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .info-group p {
-      margin: 0;
-      font-size: 1.2rem;
-      background: rgba(255, 255, 255, 0.5);
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-    }
-
-    .ticket-table-wrapper {
-      background: var(--panel);
-      border-radius: 16px;
-      border: 1px solid rgba(214, 199, 178, 0.85);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      margin-bottom: 32px;
-    }
-
-    .ticket-table-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--line);
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--accent-strong);
-    }
+    .ticket-table-wrapper { background: var(--panel); border-radius: 16px; border: 1px solid rgba(214, 199, 178, 0.85); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 32px; }
+    .ticket-table-header { padding: 20px 24px; border-bottom: 1px solid var(--line); font-size: 1.1rem; font-weight: 700; color: var(--accent-strong); }
 
     table { width: 100%; border-collapse: collapse; }
-
-    th {
-      background: rgba(15, 118, 110, 0.08);
-      padding: 12px 16px;
-      text-align: left;
-      font-weight: 700;
-      color: var(--accent-strong);
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    td {
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(214, 199, 178, 0.5);
-      font-size: 0.95rem;
-    }
-
+    th { background: rgba(15, 118, 110, 0.08); padding: 12px 16px; text-align: left; font-weight: 700; color: var(--accent-strong); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 12px 16px; border-bottom: 1px solid rgba(214, 199, 178, 0.5); font-size: 0.95rem; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: rgba(15, 118, 110, 0.04); }
 
     .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
     .badge-waiting { background: #fef3c7; color: #92400e; }
 
-    .btn {
-      display: inline-block;
-      padding: 8px 16px;
-      border: 0;
-      border-radius: 10px;
-      font: inherit;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.2s ease, opacity 0.2s ease;
-      text-decoration: none;
-    }
-
-    .btn-primary {
-      color: #f8fafc;
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      box-shadow: 0 8px 20px rgba(15, 118, 110, 0.22);
-    }
-
-    .btn-danger {
-      color: #f8fafc;
-      background: linear-gradient(135deg, var(--danger), #8b1a12);
-      box-shadow: 0 8px 20px rgba(180, 35, 24, 0.22);
-    }
-
+    .btn { display: inline-block; padding: 8px 16px; border: 0; border-radius: 10px; font: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: transform 0.2s ease, opacity 0.2s ease; text-decoration: none; }
+    .btn-primary { color: #f8fafc; background: linear-gradient(135deg, var(--accent), var(--accent-strong)); box-shadow: 0 8px 20px rgba(15, 118, 110, 0.22); }
+    .btn-danger { color: #f8fafc; background: linear-gradient(135deg, var(--danger), #8b1a12); box-shadow: 0 8px 20px rgba(180, 35, 24, 0.22); }
     .btn:hover { transform: translateY(-1px); }
 
     .empty-msg { text-align: center; padding: 40px; color: var(--muted); }
-
-    .error-msg {
-      background: #fee2e2;
-      color: var(--danger);
-      padding: 12px 16px;
-      border-radius: 10px;
-      margin-bottom: 16px;
-      font-weight: 600;
-    }
+    .error-msg { background: #fee2e2; color: var(--danger); padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; }
   </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- Header -->
   <div class="header">
     <h1 class="header-title">🔧 <spring:message code="technician.title"/></h1>
     <div class="header-actions">
@@ -194,13 +103,15 @@
       <a href="${pageContext.request.contextPath}/technician/my-tickets" class="btn btn-primary">
         📋 <spring:message code="technician.my.tickets"/>
       </a>
-      <button class="btn btn-danger" onclick="logout()">
-        <spring:message code="common.logout"/>
-      </button>
+      <form method="post" action="${pageContext.request.contextPath}/auth/logout"
+            onsubmit="return confirm('<spring:message code="profile.logout.confirm"/>')">
+        <button type="submit" class="btn btn-danger">
+          <spring:message code="common.logout"/>
+        </button>
+      </form>
     </div>
   </div>
 
-  <!-- Teknisyen Bilgileri -->
   <div class="user-info">
     <div class="info-group">
       <label><spring:message code="profile.fullname"/></label>
@@ -216,7 +127,6 @@
     </div>
   </div>
 
-  <!-- Hata mesajı -->
   <c:if test="${param.error == 'already_assigned'}">
     <div class="error-msg">⚠️ <spring:message code="technician.error.already_assigned"/></div>
   </c:if>
@@ -224,7 +134,6 @@
     <div class="error-msg">⚠️ <spring:message code="common.error"/></div>
   </c:if>
 
-  <!-- Bekleyen Ticketlar -->
   <div class="ticket-table-wrapper">
     <div class="ticket-table-header">📋 <spring:message code="technician.pending"/></div>
     <c:choose>
@@ -251,10 +160,8 @@
               <td>${ticket.title}</td>
               <td>${ticket.description}</td>
               <td>${ticket.category.categoryName}</td>
-              <td>
-                <span class="badge badge-waiting">${ticket.status.statusName}</span>
-              </td>
-              <td>${ticket.createdAt}</td>
+              <td><span class="badge badge-waiting">${ticket.status.statusName}</span></td>
+              <td>${ticket.formattedCreatedAt}</td>
               <td>
                 <form method="post" action="${pageContext.request.contextPath}/technician/tickets/${ticket.ticketId}/assign">
                   <button type="submit" class="btn btn-primary">
@@ -269,26 +176,6 @@
       </c:otherwise>
     </c:choose>
   </div>
-
 </div>
-
-<script>
-  async function logout() {
-    if (!confirm("<spring:message code='profile.logout.confirm'/>")) return;
-    try {
-      const response = await fetch("<%= request.getContextPath() %>/auth/logout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      });
-      if (response.ok) {
-        setTimeout(() => {
-          window.location.href = "<%= request.getContextPath() %>/login";
-        }, 1000);
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  }
-</script>
 </body>
 </html>

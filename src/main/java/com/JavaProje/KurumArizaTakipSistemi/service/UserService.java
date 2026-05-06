@@ -163,7 +163,7 @@ public class UserService {
     }
 
     @Transactional
-    public boolean setRole(long userId, long roleId)
+    public void setRole(long userId, long roleId)
     {
         logger.info("UserService.setRole() - userId={} roleId={}", userId, roleId);
 
@@ -179,7 +179,6 @@ public class UserService {
 
         user.setRole(persistedRole);
         userDAO.update(user);
-        return true;
     }
 
     @Transactional

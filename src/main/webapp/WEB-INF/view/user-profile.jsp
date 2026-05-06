@@ -136,29 +136,14 @@
         }
 
         .btn-danger:hover { transform: translateY(-1px); }
-        .btn:disabled { opacity: 0.7; cursor: wait; transform: none; }
 
-        .feedback {
-            min-height: 24px;
-            margin: 16px 0 0;
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
-
-        .feedback.error { color: var(--danger); }
-        .feedback.success { color: var(--success); }
-
-        .lang-switcher {
-            font-size: 0.85rem;
-        }
-
+        .lang-switcher { font-size: 0.85rem; }
         .lang-switcher a {
             color: var(--accent-strong);
             text-decoration: none;
             font-weight: 600;
             margin-left: 8px;
         }
-
         .lang-switcher a:hover { text-decoration: underline; }
 
         @media (max-width: 640px) {
@@ -184,9 +169,12 @@
                 <a href="?lang=tr">🇹🇷 Türkçe</a>
                 <a href="?lang=en">🇬🇧 English</a>
             </div>
-            <button class="btn btn-danger" id="logoutBtn" onclick="logout()">
-                <spring:message code="profile.logout"/>
-            </button>
+            <form method="post" action="${pageContext.request.contextPath}/auth/logout"
+                  onsubmit="return confirm('<spring:message code="profile.logout.confirm"/>')">
+                <button type="submit" class="btn btn-danger">
+                    <spring:message code="profile.logout"/>
+                </button>
+            </form>
         </div>
     </div>
 
@@ -225,49 +213,9 @@
             </a>
         </div>
     </div>
-
-    <div id="feedback" class="feedback" aria-live="polite"></div>
 </div>
 
 <script>
-    function setFeedback(message, type) {
-        const feedback = document.getElementById("feedback");
-        feedback.textContent = message;
-        feedback.className = "feedback " + type;
-    }
-
-    async function logout() {
-        if (!confirm("<spring:message code='profile.logout.confirm'/>")) return;
-
-        const logoutBtn = document.getElementById("logoutBtn");
-        logoutBtn.disabled = true;
-        setFeedback("<spring:message code='profile.logout.loading'/>", "success");
-
-        try {
-            const response = await fetch("<%= request.getContextPath() %>/auth/logout", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" }
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                setFeedback(data.error || "<spring:message code='common.error'/>", "error");
-                logoutBtn.disabled = false;
-                return;
-            }
-
-            setFeedback(data.message || "<spring:message code='profile.logout.success'/>", "success");
-
-            setTimeout(() => {
-                window.location.href = "<%= request.getContextPath() %>/login";
-            }, 1000);
-        } catch (error) {
-            setFeedback("<spring:message code='common.error'/>", "error");
-            logoutBtn.disabled = false;
-        }
-    }
-
     window.addEventListener("load", () => {
         const fullName = document.getElementById("fullName").textContent.trim();
         if (!fullName) {

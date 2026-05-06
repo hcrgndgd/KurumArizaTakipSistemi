@@ -54,12 +54,7 @@
         .header-actions { display: flex; gap: 12px; align-items: center; }
 
         .lang-switcher { font-size: 0.85rem; }
-        .lang-switcher a {
-            color: var(--accent-strong);
-            text-decoration: none;
-            font-weight: 600;
-            margin-left: 8px;
-        }
+        .lang-switcher a { color: var(--accent-strong); text-decoration: none; font-weight: 600; margin-left: 8px; }
         .lang-switcher a:hover { text-decoration: underline; }
 
         .btn {
@@ -74,81 +69,29 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .btn-primary {
-            color: #f8fafc;
-            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-            box-shadow: 0 16px 30px rgba(15, 118, 110, 0.22);
-        }
-
+        .btn-primary { color: #f8fafc; background: linear-gradient(135deg, var(--accent), var(--accent-strong)); box-shadow: 0 16px 30px rgba(15, 118, 110, 0.22); }
         .btn-primary:hover { transform: translateY(-1px); }
-
         .btn-secondary { color: var(--text); background: var(--line); }
         .btn-secondary:hover { transform: translateY(-1px); }
 
-        .error {
-            background: #fee;
-            color: var(--danger);
-            padding: 16px;
-            border-radius: 8px;
-            border-left: 4px solid var(--danger);
-            margin-bottom: 16px;
-        }
+        .error { background: #fee; color: var(--danger); padding: 16px; border-radius: 8px; border-left: 4px solid var(--danger); margin-bottom: 16px; }
 
-        .empty-state {
-            background: var(--panel);
-            padding: 48px;
-            border-radius: 16px;
-            border: 1px solid rgba(214, 199, 178, 0.85);
-            text-align: center;
-            box-shadow: var(--shadow);
-        }
-
+        .empty-state { background: var(--panel); padding: 48px; border-radius: 16px; border: 1px solid rgba(214, 199, 178, 0.85); text-align: center; box-shadow: var(--shadow); }
         .empty-state p { font-size: 1.1rem; color: var(--muted); margin-bottom: 24px; }
 
-        table {
-            width: 100%;
-            background: var(--panel);
-            border-collapse: collapse;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-        }
-
+        table { width: 100%; background: var(--panel); border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
         thead { background: var(--accent); color: white; }
-
-        th {
-            padding: 16px;
-            text-align: left;
-            font-weight: 700;
-            border-bottom: 2px solid rgba(214, 199, 178, 0.85);
-        }
-
-        td {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(214, 199, 178, 0.5);
-        }
-
+        th { padding: 16px; text-align: left; font-weight: 700; border-bottom: 2px solid rgba(214, 199, 178, 0.85); }
+        td { padding: 12px 16px; border-bottom: 1px solid rgba(214, 199, 178, 0.5); }
         tbody tr:hover { background: rgba(15, 118, 110, 0.05); }
         tbody tr:last-child td { border-bottom: none; }
 
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
+        .status-badge { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; }
         .status-open { background: #fef3c7; color: #92400e; }
         .status-closed { background: #dcfce7; color: #15803d; }
         .status-in-progress { background: #bfdbfe; color: #1e40af; }
 
-        .ticket-link {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
+        .ticket-link { color: var(--accent); text-decoration: none; font-weight: 600; }
         .ticket-link:hover { text-decoration: underline; }
 
         .footer { margin-top: 32px; text-align: center; }
@@ -167,7 +110,6 @@
 <body>
 <div class="container">
 
-    <!-- Header -->
     <div class="header">
         <h1>🎫 <spring:message code="ticket.list.title"/></h1>
         <div class="header-actions">
@@ -181,12 +123,10 @@
         </div>
     </div>
 
-    <!-- Hata -->
     <c:if test="${not empty error}">
         <div class="error">${error}</div>
     </c:if>
 
-    <!-- Boş durum -->
     <c:if test="${empty tickets}">
         <div class="empty-state">
             <p><spring:message code="ticket.list.empty"/></p>
@@ -196,7 +136,6 @@
         </div>
     </c:if>
 
-    <!-- Ticket tablosu -->
     <c:if test="${not empty tickets}">
         <table>
             <thead>
@@ -237,7 +176,7 @@
                             <c:otherwise>-</c:otherwise>
                         </c:choose>
                     </td>
-                    <td>${t.createdAt}</td>
+                    <td>${t.formattedCreatedAt}</td>
                 </tr>
             </c:forEach>
             </tbody>

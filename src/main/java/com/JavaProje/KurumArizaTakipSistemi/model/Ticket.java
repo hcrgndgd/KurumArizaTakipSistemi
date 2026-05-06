@@ -86,4 +86,14 @@ public class  Ticket {
             createdAt = LocalDateTime.now();
         }
     }
+
+    public String getFormattedCreatedAt() {
+        if (createdAt == null) return "-";
+        return createdAt.format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+    }
+
+    public String getFormattedUpdatedAt() {
+        if (updatedAt == null) return "-";
+        return updatedAt.format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+    }
 }

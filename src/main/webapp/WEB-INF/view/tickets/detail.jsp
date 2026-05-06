@@ -54,12 +54,7 @@
         .header-actions { display: flex; gap: 12px; align-items: center; }
 
         .lang-switcher { font-size: 0.85rem; }
-        .lang-switcher a {
-            color: var(--accent-strong);
-            text-decoration: none;
-            font-weight: 600;
-            margin-left: 8px;
-        }
+        .lang-switcher a { color: var(--accent-strong); text-decoration: none; font-weight: 600; margin-left: 8px; }
         .lang-switcher a:hover { text-decoration: underline; }
 
         .btn {
@@ -116,37 +111,15 @@
             border: 1px solid rgba(15, 118, 110, 0.1);
         }
 
-        .meta-label {
-            font-size: 0.8rem;
-            color: var(--muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
+        .meta-label { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
         .meta-value { font-size: 1rem; color: var(--text); font-weight: 600; }
 
-        .status-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 700;
-        }
-
+        .status-badge { display: inline-block; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; }
         .status-open { background: #fef3c7; color: #92400e; }
         .status-closed { background: #dcfce7; color: #15803d; }
         .status-in-progress { background: #bfdbfe; color: #1e40af; }
 
-        .back-link {
-            display: inline-block;
-            margin-top: 24px;
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
+        .back-link { display: inline-block; margin-top: 24px; color: var(--accent); text-decoration: none; font-weight: 600; }
         .back-link:hover { text-decoration: underline; }
 
         @media (max-width: 640px) {
@@ -174,19 +147,16 @@
     </div>
 
     <div class="detail-card">
-        <!-- Başlık -->
         <div class="detail-section">
             <div class="section-title"><spring:message code="ticket.title"/></div>
             <div class="section-content">${ticket.title}</div>
         </div>
 
-        <!-- Açıklama -->
         <div class="detail-section">
             <div class="section-title"><spring:message code="ticket.description"/></div>
             <div class="section-content" style="white-space: pre-wrap;">${ticket.description}</div>
         </div>
 
-        <!-- Meta Bilgiler -->
         <div class="meta-grid">
             <div class="meta-item">
                 <div class="meta-label"><spring:message code="ticket.status"/></div>
@@ -216,14 +186,14 @@
 
             <div class="meta-item">
                 <div class="meta-label"><spring:message code="ticket.created.at"/></div>
-                <div class="meta-value">${ticket.createdAt}</div>
+                <div class="meta-value">${ticket.formattedCreatedAt}</div>
             </div>
 
             <div class="meta-item">
                 <div class="meta-label"><spring:message code="ticket.updated.at"/></div>
                 <div class="meta-value">
                     <c:choose>
-                        <c:when test="${not empty ticket.updatedAt}">${ticket.updatedAt}</c:when>
+                        <c:when test="${not empty ticket.updatedAt}">${ticket.formattedUpdatedAt}</c:when>
                         <c:otherwise><spring:message code="ticket.not.updated"/></c:otherwise>
                     </c:choose>
                 </div>
