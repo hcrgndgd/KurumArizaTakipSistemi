@@ -3,8 +3,10 @@ package com.JavaProje.KurumArizaTakipSistemi.service;
 
 import com.JavaProje.KurumArizaTakipSistemi.dao.RoleDAO;
 import com.JavaProje.KurumArizaTakipSistemi.dao.TicketDAO;
+import com.JavaProje.KurumArizaTakipSistemi.dao.TicketStatusDAO;
 import com.JavaProje.KurumArizaTakipSistemi.dao.UserDAO;
 import com.JavaProje.KurumArizaTakipSistemi.model.Role;
+import com.JavaProje.KurumArizaTakipSistemi.model.Ticket;
 import com.JavaProje.KurumArizaTakipSistemi.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,9 @@ public class UserService {
 
     @Autowired
     private TicketDAO ticketDAO;
+
+    @Autowired
+    private TicketStatusDAO ticketStatusDAO;
 
     @Autowired
     private EmailService emailService;
@@ -193,14 +198,43 @@ public class UserService {
         User user = userDAO.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("This user doesn't exist"));
 
-        // First, delete all tickets where this user is the requester or assigned technician
-        int deletedTickets = ticketDAO.deleteTicketsByUserId(id);
-        logger.info("UserService.deleteUser() - deleted {} tickets for userId={}", deletedTickets, id);
+        String roleName = user.getRole() != null ? user.getRole().getRoleName() : null;
+        roleName = roleName == null ? "" : roleName.trim().toUpperCase();
+
+        // Tickets reference requesterId (NOT NULL). To delete a user, we must delete tickets created by them.
+        int deletedRequesterTickets = ticketDAO.deleteTicketsByRequesterId(id);
+
+        int unassignedTickets = 0;
+        if ("TECHNICIAN".equals(roleName)) {
+            // For technicians, do not delete tickets they are assigned to; unassign and reopen them.
+            var openStatus = ticketStatusDAO.findByName("OPEN")
+                    .orElseThrow(() -> new IllegalStateException("Missing ticket status: OPEN"));
+
+            List<Ticket> assignedTickets = ticketDAO.findByAssignedTechnicianId(id);
+            for (Ticket t : assignedTickets) {
+                t.setAssignedTechnician(null);
+                t.setStatus(openStatus);
+                t.setUpdatedAt(LocalDateTime.now());
+                ticketDAO.update(t);
+                unassignedTickets++;
+            }
+        } else {
+            // Non-technicians: safe to delete any tickets where they are referenced (includes requester).
+            // Note: requester tickets are already deleted above; this deletes only assignedTechnician references if any exist.
+            int deletedRelated = ticketDAO.deleteTicketsByUserId(id);
+            // deleteTicketsByUserId will also try to delete requester tickets, but they are already gone; that's fine.
+            // Keep logging consistent.
+            logger.info("UserService.deleteUser() - deleted {} related tickets for userId={}", deletedRelated, id);
+        }
+
+        logger.info("UserService.deleteUser() - deletedRequesterTickets={} unassignedTickets={} userId={}",
+                deletedRequesterTickets, unassignedTickets, id);
 
         // Then delete the user
         userDAO.delete(user);
         logger.info("UserService.deleteUser() - user deleted successfully - id={}", id);
     }
+
 
     @Transactional
     public void addRole(String roleName) {

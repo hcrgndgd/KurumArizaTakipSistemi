@@ -177,4 +177,13 @@ public class TicketDAO {
                 .setParameter("userId", userId)
                 .executeUpdate();
     }
+
+    public int deleteTicketsByRequesterId(Long userId) {
+        logger.debug("TicketDAO.deleteTicketsByRequesterId() - userId={}", userId);
+        return getSession()
+                .createMutationQuery(
+                        "DELETE FROM Ticket t WHERE t.requester.userId = :userId")
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
 }

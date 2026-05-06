@@ -22,11 +22,21 @@ public class WebConfig implements WebMvcConfigurer {
         registry.jsp("/WEB-INF/view/", ".jsp");
     }
 
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Statik kaynakları sunmayı etkinleştir (CSS, JS, resimler)
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("classpath:/static/");
+        registry.addResourceHandler("/resources/**")
+                .addResourceLocations("classpath:/resources/");
+    }
+
     @Bean
     public ResourceBundleMessageSource messageSource() {
         ResourceBundleMessageSource source = new ResourceBundleMessageSource();
         source.setBasename("messages");
         source.setDefaultEncoding("UTF-8");
+        source.setFallbackToSystemLocale(true);
         return source;
     }
 
@@ -34,6 +44,7 @@ public class WebConfig implements WebMvcConfigurer {
     public LocaleResolver localeResolver() {
         CookieLocaleResolver resolver = new CookieLocaleResolver("lang");
         resolver.setDefaultLocale(new Locale("tr", "TR"));
+        resolver.setCookieMaxAge(3600);
         return resolver;
     }
 

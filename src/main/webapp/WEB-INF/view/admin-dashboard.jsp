@@ -520,11 +520,43 @@
     }
 
     async function deleteUser(userId, button) {
-        if (!window.confirm(i18n.confirmDelete)) return;
+        const row = button ? button.closest("tr") : null;
+        const roleSelect = row ? row.querySelector(".role-select") : null;
+        const roleId = roleSelect ? String(roleSelect.value || "") : "";
+        const roleName = roles.find(r => String(r.roleId) === roleId)?.roleName || "";
+
+        // Technician special warning: they might be working on active tickets.
+        if (String(roleName).trim().toUpperCase() === "TECHNICIAN") {
+            const activeAssigned = tickets.filter(t => {
+                if (!t || !t.assignedUser) return false;
+                if (String(t.assignedUser.userId) !== String(userId)) return false;
+                const status = String(t.statusName || "").trim().toUpperCase();
+                return !["CLOSED", "COMPLETED", "RESOLVED", "KAPALI", "TAMAMLANDI"].includes(status);
+            }).length;
+
+            if (activeAssigned > 0) {
+                const msg = "Bu teknisyen su anda " + activeAssigned + " adet ariza uzerinde calisiyor. " +
+                    "Silme islemi bu arizalari teknisyenden alacak ve durumunu OPEN yapacak. Devam edilsin mi?";
+                if (!window.confirm(msg)) return;
+            } else {
+                if (!window.confirm(i18n.confirmDelete)) return;
+            }
+        } else {
+            if (!window.confirm(i18n.confirmDelete)) return;
+        }
         button.disabled = true;
         try {
-            await request(contextPath + "/admin/users/" + userId, { method: "DELETE" });
-            setFeedback(usersFeedback, i18n.userDeleted, "success");
+            const result = await request(contextPath + "/admin/users/" + userId, { method: "DELETE" });
+
+            // Backend can require an explicit confirmation (e.g. user has related tickets).
+            if (result && result.confirmation_required) {
+                const message = result.message || i18n.confirmDelete;
+                const ok = window.confirm(message);
+                if (!ok) return;
+                await request(contextPath + "/admin/users/" + userId + "?confirm=true", { method: "DELETE" });
+            }
+
+            setFeedback(usersFeedback, (result && result.message) ? result.message : i18n.userDeleted, "success");
             await refreshDashboard();
         } catch (error) {
             setFeedback(usersFeedback, error.message, "error");

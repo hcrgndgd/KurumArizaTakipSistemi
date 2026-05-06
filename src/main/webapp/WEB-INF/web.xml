@@ -4,42 +4,10 @@
          https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
 
-  <listener>
-    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-  </listener>
-
-  <context-param>
-    <param-name>contextClass</param-name>
-    <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
-  </context-param>
-
-  <context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>com.JavaProje.KurumArizaTakipSistemi.config.AppConfig</param-value>
-  </context-param>
-
-  <servlet>
-    <servlet-name>dispatcher</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <init-param>
-      <param-name>contextClass</param-name>
-      <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
-    </init-param>
-    <init-param>
-      <param-name>contextConfigLocation</param-name>
-      <param-value>com.JavaProje.KurumArizaTakipSistemi.config.WebConfig</param-value>
-    </init-param>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>dispatcher</servlet-name>
-    <url-pattern>/</url-pattern>
-  </servlet-mapping>
-
-  <welcome-file-list>
-    <welcome-file>login.jsp</welcome-file>
-  </welcome-file-list>
+  <!--
+    Spring MVC bootstrapping is handled by WebAppInitializer (Servlet 3+).
+    Keep this web.xml minimal to avoid creating a second DispatcherServlet/root context.
+  -->
 
   <error-page>
     <error-code>404</error-code>

@@ -6,9 +6,13 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Controller
 @RequestMapping("/auth")
@@ -86,6 +90,19 @@ public class AuthController {
             model.addAttribute("error", e.getMessage());
             return "login";
         }
+    }
+
+    // Used by fetch() on some JSPs (Content-Type: application/json). Returns JSON to avoid parsing errors on the client.
+    @PostMapping(value = "/logout", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> logoutJson(HttpSession session) {
+        String email = session.getAttribute("currentUser") != null
+                ? ((User) session.getAttribute("currentUser")).getEmail()
+                : "bilinmiyor";
+
+        session.invalidate();
+        logger.info("POST /auth/logout (json) - Çıkış yapıldı | email={}", email);
+        return ResponseEntity.ok(Map.of("message", "Logged out"));
     }
 
     @PostMapping("/logout")
